@@ -24,3 +24,4 @@ Spring Boot 기반 협업 서버입니다.
 ```bash
 curl http://localhost:8080/api/v1/health
 ```
+ 
