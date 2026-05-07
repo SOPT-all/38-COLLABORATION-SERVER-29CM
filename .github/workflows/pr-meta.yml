@@ -1,0 +1,54 @@
+name: PR Metadata
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  assign-and-request-review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Assign author and request reviewer
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const members = ['Kimgyuilli', 'youtheyeon'];
+            const { owner, repo } = context.repo;
+            const pullRequest = context.payload.pull_request;
+            const author = pullRequest.user.login;
+            const issue_number = pullRequest.number;
+
+            const normalizedAuthor = author.toLowerCase();
+            const reviewer = members.find(
+              (member) => member.toLowerCase() !== normalizedAuthor
+            );
+
+            await github.rest.issues.addAssignees({
+              owner,
+              repo,
+              issue_number,
+              assignees: [author],
+            });
+
+            if (!reviewer) {
+              core.info(`No reviewer found for PR author: ${author}`);
+              return;
+            }
+
+            await github.rest.pulls.requestReviewers({
+              owner,
+              repo,
+              pull_number: issue_number,
+              reviewers: [reviewer],
+            });
+
