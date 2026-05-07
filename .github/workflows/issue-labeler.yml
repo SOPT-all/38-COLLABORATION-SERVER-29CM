@@ -1,0 +1,46 @@
+name: Issue Labeler
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+
+permissions:
+  issues: write
+
+jobs:
+  label-by-title:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Add label from issue title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labelByPrefix = {
+              Feature: 'Feature',
+              Bug: 'Bug',
+              Refactor: 'Refactor',
+              Chore: 'Chore',
+              Docs: 'Docs',
+            };
+
+            const { owner, repo } = context.repo;
+            const issue = context.payload.issue;
+            const match = issue.title.match(/^\[(Feature|Bug|Refactor|Chore|Docs)\]/);
+
+            if (!match) {
+              core.info(`No issue type prefix found: ${issue.title}`);
+              return;
+            }
+
+            const label = labelByPrefix[match[1]];
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: issue.number,
+              labels: [label],
+            });
+

@@ -1,0 +1,32 @@
+name: PR Title
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+
+jobs:
+  validate-title:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate PR title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const pattern = /^\[(Feature|Bug|Refactor|Chore|Docs)\]\s.+/;
+
+            if (!pattern.test(title)) {
+              core.setFailed(
+                'PR 제목은 "[Feature] ...", "[Bug] ...", "[Refactor] ...", "[Chore] ...", "[Docs] ..." 형식이어야 합니다.'
+              );
+            }
+
