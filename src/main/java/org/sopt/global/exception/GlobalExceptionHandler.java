@@ -24,6 +24,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // 도메인에서 명시적으로 발생시킨 비즈니스 예외를 처리합니다.
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<CommonApiResponse<Void>> handleBaseException(BaseException exception) {
         ErrorCode errorCode = exception.getErrorCode();
@@ -33,6 +34,7 @@ public class GlobalExceptionHandler {
                 .body(CommonApiResponse.failureBody(errorCode));
     }
 
+    // @Valid 요청 본문 검증 실패를 필드별 오류 메시지로 변환합니다.
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonApiResponse<Map<String, Object>> handleMethodArgumentNotValidException(
@@ -46,6 +48,7 @@ public class GlobalExceptionHandler {
         return CommonApiResponse.failureBody(GlobalErrorCode.INVALID_REQUEST, errors);
     }
 
+    // PathVariable, RequestParam 등 메서드 파라미터 검증 실패를 처리합니다.
     @ExceptionHandler(HandlerMethodValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonApiResponse<Void> handleHandlerMethodValidationException(
@@ -55,6 +58,7 @@ public class GlobalExceptionHandler {
         return CommonApiResponse.failureBody(GlobalErrorCode.INVALID_REQUEST);
     }
 
+    // 잘못된 JSON 형식이나 읽을 수 없는 요청 본문을 처리합니다.
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonApiResponse<Void> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
@@ -62,6 +66,7 @@ public class GlobalExceptionHandler {
         return CommonApiResponse.failureBody(GlobalErrorCode.INVALID_REQUEST);
     }
 
+    // 서비스 로직에서 발생한 잘못된 인자 예외를 처리합니다.
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonApiResponse<Void> handleIllegalArgumentException(IllegalArgumentException exception) {
@@ -69,6 +74,7 @@ public class GlobalExceptionHandler {
         return CommonApiResponse.failureBody(GlobalErrorCode.INVALID_REQUEST);
     }
 
+    // DB 제약 조건 위반을 잘못된 요청으로 처리합니다.
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonApiResponse<Void> handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
@@ -76,6 +82,7 @@ public class GlobalExceptionHandler {
         return CommonApiResponse.failureBody(GlobalErrorCode.INVALID_REQUEST);
     }
 
+    // JPA 또는 트랜잭션 시스템 오류를 서버 내부 오류로 처리합니다.
     @ExceptionHandler({
             JpaSystemException.class,
             TransactionSystemException.class
@@ -86,6 +93,7 @@ public class GlobalExceptionHandler {
         return CommonApiResponse.failureBody(GlobalErrorCode.INTERNAL_SERVER_ERROR);
     }
 
+    // 존재하지 않는 정적 리소스 또는 경로 요청을 404로 처리합니다.
     @ExceptionHandler(NoResourceFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public CommonApiResponse<Void> handleNoResourceFoundException(NoResourceFoundException exception) {
@@ -93,6 +101,7 @@ public class GlobalExceptionHandler {
         return CommonApiResponse.failureBody(GlobalErrorCode.RESOURCE_NOT_FOUND);
     }
 
+    // 위에서 분류하지 못한 예외를 마지막 안전망으로 처리합니다.
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public CommonApiResponse<Void> handleException(Exception exception) {
