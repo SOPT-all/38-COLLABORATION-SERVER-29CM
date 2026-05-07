@@ -2,6 +2,7 @@ package org.sopt.global.exception;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.global.code.ErrorCode;
 import org.sopt.global.code.GlobalErrorCode;
