@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
         log.warn("Business exception: {}", errorCode.getMessage());
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
-                .body(CommonApiResponse.failureBody(errorCode, exception.getDetails()));
+                .body(CommonApiResponse.failureBody(errorCode));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -38,12 +38,12 @@ public class GlobalExceptionHandler {
     public CommonApiResponse<Map<String, Object>> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException exception
     ) {
-        Map<String, Object> details = new LinkedHashMap<>();
+        Map<String, Object> errors = new LinkedHashMap<>();
         for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
-            details.put(fieldError.getField(), fieldError.getDefaultMessage());
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
 
-        return CommonApiResponse.failureBody(GlobalErrorCode.INVALID_REQUEST, details);
+        return CommonApiResponse.failureBody(GlobalErrorCode.INVALID_REQUEST, errors);
     }
 
     @ExceptionHandler(HandlerMethodValidationException.class)
