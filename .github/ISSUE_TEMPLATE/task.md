@@ -1,6 +1,6 @@
 ---
 name: 작업 이슈
-about: 이슈
+about: 작업 이슈
 title: "[Feature] "
 labels: ""
 assignees: ""
