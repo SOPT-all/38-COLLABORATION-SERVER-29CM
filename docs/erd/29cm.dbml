@@ -24,7 +24,7 @@ Table categories {
     (depth, display_order, id)
   }
 
-  Note: 'Hierarchical category table for top, middle, and sub categories. Global menus such as Shopping, Showcase, PT are excluded.'
+  Note: 'Hierarchical category table. depth 1=top, 2=middle, 3=sub. Global menus such as Shopping, Showcase, PT are excluded.'
 }
 
 Table home_shortcuts {

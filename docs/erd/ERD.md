@@ -30,6 +30,7 @@
 ### Category
 
 - `categories`는 top, middle, sub 카테고리를 하나의 self-reference 테이블로 관리한다.
+- `categories.depth`는 `1=top`, `2=middle`, `3=sub`을 의미한다.
 - 홈 숏컷은 같은 `categories` 데이터를 참조하되, 홈 전용 이미지와 노출 순서는 `home_shortcuts`에서 별도 관리한다.
 
 ### Home

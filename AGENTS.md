@@ -10,8 +10,9 @@
 2. [docs/spec/REQUIREMENTS.md](docs/spec/REQUIREMENTS.md)
 3. [docs/erd/ERD.md](docs/erd/ERD.md)
 4. [docs/erd/29cm.dbml](docs/erd/29cm.dbml)
-5. Local team wiki: `../38-COLLABORATION-SERVER-29CM.wiki`
-6. Existing implementation code
+5. [docs/design/API_IMPLEMENTATION.md](docs/design/API_IMPLEMENTATION.md)
+6. Local team wiki: `../38-COLLABORATION-SERVER-29CM.wiki`
+7. Existing implementation code
 
 API 작업이 포함되면 아래 "API Specification Access"를 먼저 확인한다.
 
@@ -23,6 +24,7 @@ API 작업이 포함되면 아래 "API Specification Access"를 먼저 확인한
 - `docs/api/API_SPEC_SNAPSHOT.md` is a dated local snapshot for AI access and local development convenience.
 - Product and server behavior follows `docs/spec/REQUIREMENTS.md`.
 - ERD and table design follow `docs/erd/29cm.dbml` and `docs/erd/ERD.md`.
+- API implementation direction follows `docs/design/API_IMPLEMENTATION.md`, but API contracts, requirements, and ERD documents take priority over it.
 - Code structure and conventions follow the local wiki and existing code.
 - Do not invent product policy, API fields, response shapes, or error codes.
 - If documents conflict, prefer the teamspace Notion API specification for API contracts and `docs/spec/REQUIREMENTS.md` for product/server requirements.
