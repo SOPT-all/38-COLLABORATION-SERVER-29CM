@@ -541,9 +541,21 @@ featured 정책:
 
 ## 9. DB seed 구현 기준
 
-seed는 `data.sql` 사용을 기본으로 한다.
-Spring Boot에서 JPA DDL 생성 이후 `data.sql`이 실행되도록 `spring.jpa.defer-datasource-initialization=true` 설정을 사용한다.
-개발 환경에서 항상 seed를 적재해야 하면 `spring.sql.init.mode=always` 설정을 함께 사용한다.
+seed는 `src/main/resources/db/seed/*.sql`에 도메인 또는 의존 순서별로 분리해 관리한다.
+루트 `data.sql`은 사용하지 않는다.
+
+로컬 환경 설정:
+
+- Spring Boot에서 JPA DDL 생성 이후 seed SQL이 실행되도록 `spring.jpa.defer-datasource-initialization=true` 설정을 사용한다.
+- 개발 환경에서 항상 seed를 적재하도록 `spring.sql.init.mode=always` 설정을 사용한다.
+- seed 파일 위치는 `spring.sql.init.data-locations=optional:classpath*:db/seed/*.sql`로 지정한다.
+- `optional:` prefix를 사용해 아직 seed 파일이 없는 브랜치에서도 애플리케이션 실행이 실패하지 않도록 한다.
+
+파일명 규칙:
+
+- FK 참조 순서를 알 수 있도록 숫자 prefix를 둔다.
+- 예: `01-users.sql`, `02-categories.sql`, `03-home.sql`, `04-products.sql`, `05-product-likes.sql`, `06-showcases.sql`, `07-notices.sql`
+- 새 seed 파일을 추가할 때는 기존 파일의 FK 의존성과 실행 순서를 확인한다.
 
 필수 seed:
 
