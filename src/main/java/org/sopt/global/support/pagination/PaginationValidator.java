@@ -8,11 +8,18 @@ public final class PaginationValidator {
     private PaginationValidator() {
     }
 
-    public static int resolveSize(Integer rawSize, int defaultSize, int minSize, int maxSize) {
+    public static int resolveAndValidateSize(Integer rawSize, int defaultSize, int minSize, int maxSize) {
+        validateSize(defaultSize, minSize, maxSize);
+
         int size = rawSize == null ? defaultSize : rawSize;
+        validateSize(size, minSize, maxSize);
+
+        return size;
+    }
+
+    private static void validateSize(int size, int minSize, int maxSize) {
         if (size < minSize || size > maxSize) {
             throw new BaseException(GlobalErrorCode.INVALID_REQUEST);
         }
-        return size;
     }
 }

@@ -25,7 +25,9 @@ public class CursorCodec {
 
         try {
             String json = objectMapper.writeValueAsString(payload);
-            return Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+            return Base64.getUrlEncoder()
+                    .withoutPadding()
+                    .encodeToString(json.getBytes(StandardCharsets.UTF_8));
         } catch (JsonProcessingException exception) {
             throw new BaseException(GlobalErrorCode.INVALID_REQUEST);
         }
@@ -37,7 +39,7 @@ public class CursorCodec {
         }
 
         try {
-            byte[] decoded = Base64.getDecoder().decode(cursor);
+            byte[] decoded = Base64.getUrlDecoder().decode(cursor);
             T payload = objectMapper.readValue(decoded, payloadType);
             validate(payload);
             return payload;
