@@ -1,0 +1,201 @@
+Project "29CM Collaboration Server" {
+  database_type: 'MySQL'
+  Note: 'DBML source for dbdiagram.io. API contract follows the Notion API specification; product/server requirements follow docs/spec/REQUIREMENTS.md.'
+}
+
+Table users {
+  id bigint [pk, increment]
+  nickname varchar(50) [not null]
+  created_at datetime [not null]
+
+  Note: 'Single seeded test user. viewerType=user maps to users.id = 1.'
+}
+
+Table categories {
+  id bigint [pk, increment]
+  parent_id bigint
+  name varchar(50) [not null]
+  depth tinyint [not null]
+  display_order int [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (parent_id, display_order, id)
+    (depth, display_order, id)
+  }
+
+  Note: 'Hierarchical category table for top, middle, and sub categories. Global menus such as Shopping, Showcase, PT are excluded.'
+}
+
+Table home_shortcuts {
+  id bigint [pk, increment]
+  category_id bigint [not null]
+  name varchar(50) [not null]
+  image_url varchar(500) [not null]
+  display_order int [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (display_order, id)
+    (category_id)
+  }
+
+  Note: 'Home-specific shortcut presentation data. References the same Category data used by the nav API.'
+}
+
+Table home_carousels {
+  id bigint [pk, increment]
+  image_url varchar(500) [not null]
+  alt_text varchar(255) [not null]
+  link_url varchar(500)
+  display_order int [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (display_order, id)
+  }
+}
+
+Table home_sections {
+  id bigint [pk, increment]
+  title varchar(100) [not null]
+  description varchar(255) [not null]
+  hero_image_url varchar(500) [not null]
+  display_order int [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (display_order, id)
+  }
+}
+
+Table home_selections {
+  id bigint [pk, increment]
+  home_section_id bigint [not null]
+  image_url varchar(500) [not null]
+  title varchar(100) [not null]
+  description varchar(255) [not null]
+  display_order int [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (home_section_id, display_order, id)
+  }
+}
+
+Table products {
+  id bigint [pk, increment]
+  brand_name varchar(100) [not null]
+  name varchar(255) [not null]
+  image_url varchar(500) [not null]
+  price int [not null]
+  sale_rate int [not null, default: 0]
+  like_count int [not null, default: 0]
+  created_at datetime [not null]
+  updated_at datetime [not null]
+
+  Note: 'price means final sale price. originalPrice is out of scope. updated_at is kept because like_count changes.'
+}
+
+Table product_tags {
+  id bigint [pk, increment]
+  product_id bigint [not null]
+  name varchar(50) [not null]
+  display_order int [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (product_id, display_order, id)
+  }
+
+  Note: 'Seed-based free text tags. Server does not interpret tag semantics.'
+}
+
+Table selection_products {
+  id bigint [pk, increment]
+  home_selection_id bigint [not null]
+  product_id bigint [not null]
+  display_order int [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (home_selection_id, display_order, id)
+    (home_selection_id, product_id) [unique]
+    (product_id)
+  }
+
+  Note: 'Join table between home selections and products. Same product may appear in multiple selections.'
+}
+
+Table product_likes {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  product_id bigint [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (user_id, product_id) [unique]
+    (product_id)
+  }
+
+  Note: 'Current like state for the single test user. Toggle creates or deletes rows.'
+}
+
+Table showcase_sections {
+  id bigint [pk, increment]
+  theme varchar(50) [not null, unique]
+  title varchar(100) [not null]
+  display_order int [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (display_order, id)
+  }
+
+  Note: 'ShowCase section description is excluded from the current API response.'
+}
+
+Table showcases {
+  id bigint [pk, increment]
+  showcase_section_id bigint [not null]
+  title varchar(150) [not null]
+  description varchar(255) [not null]
+  image_url varchar(500) [not null]
+  start_date date [not null]
+  end_date date [not null]
+  display_period varchar(50) [not null]
+  is_featured boolean [not null, default: false]
+  display_order int [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (display_order, id)
+    (showcase_section_id, display_order, id)
+    (is_featured, display_order, id)
+  }
+
+  Note: 'display_order represents feed index. Larger display_order means newer/later feed. Featured fallback uses the last two by display_order.'
+}
+
+Table notices {
+  id bigint [pk, increment]
+  title varchar(255) [not null]
+  display_order int [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (display_order, id)
+  }
+
+  Note: 'All seeded notices are visible. Footer returns the latest 5 by seed index/display_order. Larger display_order means newer notice.'
+}
+
+Ref: categories.parent_id > categories.id
+Ref: home_shortcuts.category_id > categories.id
+Ref: home_selections.home_section_id > home_sections.id
+Ref: selection_products.home_selection_id > home_selections.id
+Ref: selection_products.product_id > products.id
+Ref: product_tags.product_id > products.id
+Ref: product_likes.user_id > users.id
+Ref: product_likes.product_id > products.id
+Ref: showcases.showcase_section_id > showcase_sections.id

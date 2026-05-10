@@ -4,8 +4,15 @@ Spring Boot 기반 협업 서버입니다.
 
 ## Requirements
 
-- Java 21
+- Java 17
 - Gradle Wrapper
+
+## Project Docs
+
+- [AI Agent Instructions](AGENTS.md)
+- [API Spec Snapshot](docs/api/API_SPEC_SNAPSHOT.md)
+- [Requirements](docs/spec/REQUIREMENTS.md)
+- [ERD](docs/erd/ERD.md)
 
 ## Run
 
