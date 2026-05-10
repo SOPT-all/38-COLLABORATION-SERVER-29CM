@@ -11,7 +11,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query("""
             select c
             from Category c
-            left join fetch c.parent
             order by c.displayOrder asc, c.id asc
             """)
     List<Category> findAllForNav();

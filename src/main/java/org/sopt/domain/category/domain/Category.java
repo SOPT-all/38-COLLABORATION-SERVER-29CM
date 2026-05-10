@@ -35,19 +35,15 @@ public class Category {
     @JoinColumn(name = "parent_id")
     private Category parent;
 
+    @Column(name = "parent_id", insertable = false, updatable = false)
+    private Long parentId;
+
     @Column(nullable = false, length = 50)
     private String name;
 
     @Column(nullable = false)
-    private Integer depth;
+    private int depth;
 
     @Column(nullable = false)
-    private Integer displayOrder;
-
-    public Long getParentId() {
-        if (parent == null) {
-            return null;
-        }
-        return parent.getId();
-    }
+    private int displayOrder;
 }
