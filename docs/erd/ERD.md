@@ -9,7 +9,7 @@
 
 ## 2. 공통 가정
 
-- 모든 테이블에는 `created_at`을 둔다.
+- `created_at`은 현재 `products`, `product_likes`에만 둔다.
 - `updated_at`은 실제 변경이 발생하는 테이블에만 둔다.
 - 현재 변경이 발생하는 주요 데이터는 `products.like_count`이므로 `products`에만 `updated_at`을 둔다.
 - 화면 노출 순서는 `display_order`로 관리한다.
@@ -47,6 +47,7 @@
 - 상품 태그는 `product_tags` 별도 테이블로 관리한다.
 - 상품 태그는 seed 기반 자유 문자열이며, 서버가 의미를 해석하지 않는다.
 - `products.like_count`는 좋아요 토글에 따라 실제 증감한다.
+- `products`는 `created_at`, `updated_at`을 둔다.
 
 ### Product Like
 

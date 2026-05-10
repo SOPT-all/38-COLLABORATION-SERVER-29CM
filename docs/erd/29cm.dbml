@@ -6,7 +6,6 @@ Project "29CM Collaboration Server" {
 Table users {
   id bigint [pk, increment]
   nickname varchar(50) [not null]
-  created_at datetime [not null]
 
   Note: 'Single seeded test user. viewerType=user maps to users.id = 1.'
 }
@@ -17,7 +16,6 @@ Table categories {
   name varchar(50) [not null]
   depth tinyint [not null]
   display_order int [not null]
-  created_at datetime [not null]
 
   indexes {
     (parent_id, display_order, id)
@@ -33,7 +31,6 @@ Table home_shortcuts {
   name varchar(50) [not null]
   image_url varchar(500) [not null]
   display_order int [not null]
-  created_at datetime [not null]
 
   indexes {
     (display_order, id)
@@ -47,9 +44,7 @@ Table home_carousels {
   id bigint [pk, increment]
   image_url varchar(500) [not null]
   alt_text varchar(255) [not null]
-  link_url varchar(500)
   display_order int [not null]
-  created_at datetime [not null]
 
   indexes {
     (display_order, id)
@@ -62,7 +57,6 @@ Table home_sections {
   description varchar(255) [not null]
   hero_image_url varchar(500) [not null]
   display_order int [not null]
-  created_at datetime [not null]
 
   indexes {
     (display_order, id)
@@ -76,7 +70,6 @@ Table home_selections {
   title varchar(100) [not null]
   description varchar(255) [not null]
   display_order int [not null]
-  created_at datetime [not null]
 
   indexes {
     (home_section_id, display_order, id)
@@ -102,7 +95,6 @@ Table product_tags {
   product_id bigint [not null]
   name varchar(50) [not null]
   display_order int [not null]
-  created_at datetime [not null]
 
   indexes {
     (product_id, display_order, id)
@@ -116,7 +108,6 @@ Table selection_products {
   home_selection_id bigint [not null]
   product_id bigint [not null]
   display_order int [not null]
-  created_at datetime [not null]
 
   indexes {
     (home_selection_id, display_order, id)
@@ -146,7 +137,6 @@ Table showcase_sections {
   theme varchar(50) [not null, unique]
   title varchar(100) [not null]
   display_order int [not null]
-  created_at datetime [not null]
 
   indexes {
     (display_order, id)
@@ -163,10 +153,8 @@ Table showcases {
   image_url varchar(500) [not null]
   start_date date [not null]
   end_date date [not null]
-  display_period varchar(50) [not null]
   is_featured boolean [not null, default: false]
   display_order int [not null]
-  created_at datetime [not null]
 
   indexes {
     (display_order, id)
@@ -181,7 +169,6 @@ Table notices {
   id bigint [pk, increment]
   title varchar(255) [not null]
   display_order int [not null]
-  created_at datetime [not null]
 
   indexes {
     (display_order, id)

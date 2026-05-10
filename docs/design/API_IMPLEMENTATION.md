@@ -207,7 +207,7 @@ CommonApiResponse<T>(
 구현 결정:
 
 - 공통 envelope의 `data=null`은 생략될 수 있지만, `data` 내부 DTO의 nullable 필드는 명세대로 `null`을 유지한다.
-- 예를 들어 `carousels[].linkUrl`, `pageInfo.nextCursor`는 값이 없을 때 필드를 생략하지 않고 `null`로 직렬화한다.
+- 예를 들어 `pageInfo.nextCursor`는 값이 없을 때 필드를 생략하지 않고 `null`로 직렬화한다.
 - 구현 시 nullable 필드를 가진 응답 DTO 또는 해당 필드에 `@JsonInclude(JsonInclude.Include.ALWAYS)`를 적용한다.
 - 공통 응답의 `@JsonInclude(JsonInclude.Include.NON_NULL)` 정책을 전역으로 해제하지 않는다.
 - Bean Validation 실패 시에는 `data`에 `{필드명: 메시지}` 형태의 map을 포함한다.
@@ -289,17 +289,17 @@ public record PageInfoResponse(
 
 ERD 정책:
 
-- 모든 테이블은 `created_at`을 가진다.
+- `created_at`은 현재 `products`, `product_likes`에만 둔다.
 - `updated_at`은 실제 변경이 발생하는 테이블에만 둔다.
 - 현재 `updated_at`이 필요한 테이블은 `products`다.
 
-기존 `BaseTimeEntity`는 `createdAt`, `updatedAt`을 모두 포함하므로, ERD 정책에 맞추기 위해 `BaseCreatedTimeEntity`를 새로 추가한다.
+구현 방향:
 
-- `BaseCreatedTimeEntity`는 `createdAt`만 가진다.
-- `@MappedSuperclass`, `@EntityListeners(AuditingEntityListener.class)`, `@CreatedDate`를 적용한다.
-- 대부분의 seed성 엔티티는 `BaseCreatedTimeEntity`를 상속한다.
-- `BaseTimeEntity`는 유지하되 `createdAt`, `updatedAt`이 모두 필요한 엔티티용으로 의미를 좁힌다.
-- 현재 구현 범위에서는 `Product`만 `BaseTimeEntity`를 상속한다.
+- `Product`는 기존 `BaseTimeEntity`를 상속한다.
+- `ProductLike`는 `createdAt` 필드만 직접 선언한다.
+- `ProductLike.createdAt`에는 `@CreatedDate`, `@EntityListeners(AuditingEntityListener.class)`를 적용한다.
+- 그 외 seed성 엔티티에는 시간 컬럼을 두지 않는다.
+- 별도 created-only base entity는 현재 범위에서 추가하지 않는다.
 
 ### 7.2 관계 매핑
 
@@ -507,6 +507,9 @@ featured 정책:
 - `CategoryService`
 - `CategoryRepository`
 - `NavCategoryResponse`
+- `TopCategoryResponse`
+- `MiddleCategoryResponse`
+- `SubCategoryResponse`
 
 주의:
 
@@ -564,6 +567,7 @@ Spring Boot에서 JPA DDL 생성 이후 `data.sql`이 실행되도록 `spring.jp
 - `display_order`는 API 응답 순서와 cursor 기준이므로 누락하지 않는다.
 - 이미지 컬럼에는 최종 URL 문자열을 저장한다.
 - `products.like_count` 초기값은 화면에 보여줄 운영 누적 좋아요 수 컨셉으로 임의 값을 허용한다.
+- 시간 컬럼 seed 값은 `products.created_at`, `products.updated_at`, `product_likes.created_at`에만 입력한다.
 - `product_likes` seed는 단일 테스트 사용자 `user_id=1`의 현재 좋아요 상태만 의미한다.
 - 따라서 `products.like_count`가 `product_likes` row 수와 같을 필요는 없다.
 - 단, `product_likes`에 row가 있는 상품의 `like_count`는 최소 1 이상이어야 자연스럽다.
@@ -594,7 +598,6 @@ DB seed 기반 통합 테스트를 작성할 경우 테스트 전용 seed와 실
    - `ViewerType`
    - `CursorCodec`
    - `PageInfoResponse`
-   - `BaseCreatedTimeEntity`
    - `MethodArgumentTypeMismatchException` 핸들러
 2. Entity와 Repository 구현
 3. Domain ErrorCode 구현
@@ -608,8 +611,3 @@ DB seed 기반 통합 테스트를 작성할 경우 테스트 전용 seed와 실
 8. seed 데이터 작성
 9. Swagger 확인
 10. 테스트 의존성 도입 시 MockMvc 확인
-
-## 12. 슈도코드 작성 방식
-
-슈도코드는 본 문서의 하위 섹션으로 API별로 추가한다.
-실제 `src/main/java`에는 컴파일 가능한 구현을 작성할 때만 클래스를 추가한다.
