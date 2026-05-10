@@ -22,7 +22,7 @@ public class NoticeService {
 
     public NoticeResponse getNotices() {
         List<NoticeItemResponse> notices = noticeRepository
-                .findAllByOrderByDisplayOrderDescIdDesc(PageRequest.of(0, FOOTER_NOTICE_SIZE))
+                .findFooterNotices(PageRequest.of(0, FOOTER_NOTICE_SIZE))
                 .stream()
                 .map(this::toNoticeItemResponse)
                 .toList();
