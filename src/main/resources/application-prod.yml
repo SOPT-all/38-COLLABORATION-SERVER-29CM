@@ -15,17 +15,6 @@ spring:
         format_sql: false
     open-in-view: false
 
-cloud:
-  aws:
-    region:
-      static: ${AWS_REGION}
-    s3:
-      bucket: ${S3_BUCKET}
-
-aws:
-  s3:
-    presigned-url-expiration: 3600
-
 logging:
   level:
     org.sopt: info
