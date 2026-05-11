@@ -64,14 +64,14 @@
 - `is_featured=true`인 데이터가 있으면 해당 feed를 featured로 사용한다.
 - `is_featured` 지정이 없으면 `display_order` 기준 마지막 2개를 featured로 사용한다.
 - featured와 일반 feed의 중복 노출은 허용한다.
-- `display_order` 값이 클수록 더 최신 또는 뒤쪽 index로 본다.
+- `display_order` 값이 클수록 feed의 뒤쪽 index로 본다. (`display_order`는 시간이 아닌 수동 노출 순서)
 
 ### Notice
 
 - seed에 포함된 모든 공지는 노출 가능한 공지로 간주한다.
 - 별도 활성/비활성 플래그는 두지 않는다.
-- `display_order`를 seed index 및 공지 순서로 사용한다.
-- 값이 큰 `display_order`를 더 최신 공지로 보고, 푸터 API는 최신 5개를 반환한다.
+- `display_order`를 공지의 수동 노출 순서로 사용한다.
+- 값이 작은 `display_order`를 더 우선 노출되는 공지로 보고, 푸터 API는 앞쪽 5개를 반환한다.
 
 ## 4. 테이블 목록
 

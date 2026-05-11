@@ -162,7 +162,7 @@ Table showcases {
     (is_featured, display_order, id)
   }
 
-  Note: 'display_order represents feed index. Larger display_order means newer/later feed. Featured fallback uses the last two by display_order.'
+  Note: 'display_order represents the manual exposure order (smaller appears first). Larger display_order means later feed index. Featured fallback uses the last two by display_order.'
 }
 
 Table notices {
@@ -174,7 +174,7 @@ Table notices {
     (display_order, id)
   }
 
-  Note: 'All seeded notices are visible. Footer returns the latest 5 by seed index/display_order. Larger display_order means newer notice.'
+  Note: 'All seeded notices are visible. Footer returns the first 5 by display_order ASC, id ASC. Smaller display_order means higher exposure priority.'
 }
 
 Ref: categories.parent_id > categories.id
