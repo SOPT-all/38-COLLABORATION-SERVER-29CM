@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
@@ -56,6 +57,16 @@ public class GlobalExceptionHandler {
             HandlerMethodValidationException exception
     ) {
         log.warn("Method validation failed: {}", exception.getMessage());
+        return CommonApiResponse.failureBody(GlobalErrorCode.INVALID_REQUEST);
+    }
+
+    // Query string, path variable 타입 변환 실패를 잘못된 요청으로 처리합니다.
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonApiResponse<Void> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException exception
+    ) {
+        log.warn("Method argument type mismatch: {}", exception.getMessage());
         return CommonApiResponse.failureBody(GlobalErrorCode.INVALID_REQUEST);
     }
 
