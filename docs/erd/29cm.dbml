@@ -174,7 +174,7 @@ Table notices {
     (display_order, id)
   }
 
-  Note: 'All seeded notices are visible. Footer returns the latest 5 by seed index/display_order. Larger display_order means newer notice.'
+  Note: 'All seeded notices are visible. Footer returns the first 5 by display_order ASC, id ASC. Smaller display_order means higher exposure priority.'
 }
 
 Ref: categories.parent_id > categories.id

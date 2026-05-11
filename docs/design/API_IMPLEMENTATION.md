@@ -260,8 +260,7 @@ Notice는 cursor pagination 대상이 아니며, 고정으로 최신 5건만 조
 
 정렬:
 
-- 기본은 `display_order ASC, id ASC`를 사용한다.
-- Notice는 `display_order DESC, id DESC`를 사용한다.
+- `display_order ASC, id ASC`를 사용한다. (`display_order`는 작을수록 먼저 노출되는 수동 노출 순서)
 
 다음 페이지 조회 조건은 표준 keyset pagination 형태를 사용한다.
 
@@ -529,8 +528,8 @@ featured 정책:
 
 정렬:
 
-- `display_order DESC, id DESC`
-- `display_order` 값이 큰 데이터를 더 최신 공지로 본다.
+- `display_order ASC, id ASC`
+- `display_order`는 작을수록 먼저 노출되는 수동 노출 순서이며, 푸터는 앞쪽 5개를 반환한다.
 
 필요 컴포넌트:
 
