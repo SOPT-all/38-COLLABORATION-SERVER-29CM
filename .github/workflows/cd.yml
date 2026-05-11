@@ -44,9 +44,20 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            pkill -f 'java -jar' || true
+            APP_DIR=/home/ubuntu/app
+            LOG_FILE=/home/ubuntu/app.log
+            PID_FILE=/home/ubuntu/app.pid
 
-            JAR_PATH=$(ls /home/ubuntu/app/*.jar | head -n 1)
+            if [ -f "$PID_FILE" ]; then
+              OLD_PID=$(cat "$PID_FILE")
+              if ps -p "$OLD_PID" > /dev/null 2>&1; then
+                kill "$OLD_PID"
+                sleep 5
+              fi
+              rm -f "$PID_FILE"
+            fi
+
+            JAR_PATH=$(ls "$APP_DIR"/*.jar | head -n 1)
 
             DB_HOST=${{ secrets.DB_HOST }} \
             DB_PORT=${{ secrets.DB_PORT }} \
@@ -55,7 +66,9 @@ jobs:
             DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
             S3_BUCKET=${{ secrets.S3_BUCKET }} \
             AWS_REGION=${{ secrets.AWS_REGION }} \
-            nohup java -jar "$JAR_PATH" --spring.profiles.active=prod > /home/ubuntu/app.log 2>&1 &
+            nohup java -jar "$JAR_PATH" --spring.profiles.active=prod > "$LOG_FILE" 2>&1 &
+
+            echo $! > "$PID_FILE"
 
             sleep 10
-            tail -n 50 /home/ubuntu/app.log
+            tail -n 50 "$LOG_FILE"
