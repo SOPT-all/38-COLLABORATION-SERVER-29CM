@@ -162,7 +162,7 @@ Table showcases {
     (is_featured, display_order, id)
   }
 
-  Note: 'display_order represents feed index. Larger display_order means newer/later feed. Featured fallback uses the last two by display_order.'
+  Note: 'display_order represents the manual exposure order (smaller appears first). Larger display_order means later feed index. Featured fallback uses the last two by display_order.'
 }
 
 Table notices {
