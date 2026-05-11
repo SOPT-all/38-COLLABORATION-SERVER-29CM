@@ -3,7 +3,7 @@ name: CD
 on:
   push:
     branches:
-      - 12-feat/s3
+      - develop
 
   workflow_dispatch:
 
