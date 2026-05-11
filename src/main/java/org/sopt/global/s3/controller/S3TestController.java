@@ -18,7 +18,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 
 @RestController
-@RequestMapping("/api/test/s3")
+@RequestMapping("/api/v1/test/s3")
 @RequiredArgsConstructor
 public class S3TestController {
 
