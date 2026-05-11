@@ -1,0 +1,61 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - develop
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Grant execute permission for Gradle
+        run: chmod +x ./gradlew
+
+      - name: Build Spring Boot jar
+        run: ./gradlew clean bootJar
+
+      - name: Copy jar to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: build/libs/*.jar
+          target: /home/ubuntu/app
+          strip_components: 2
+
+      - name: Deploy jar on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            pkill -f 'java -jar' || true
+
+            JAR_PATH=$(ls /home/ubuntu/app/*.jar | head -n 1)
+
+            DB_HOST=${{ secrets.DB_HOST }} \
+            DB_PORT=${{ secrets.DB_PORT }} \
+            DB_NAME=${{ secrets.DB_NAME }} \
+            DB_USERNAME=${{ secrets.DB_USERNAME }} \
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            S3_BUCKET=${{ secrets.S3_BUCKET }} \
+            AWS_REGION=${{ secrets.AWS_REGION }} \
+            nohup java -jar "$JAR_PATH" --spring.profiles.active=prod > /home/ubuntu/app.log 2>&1 &
+
+            sleep 10
+            tail -n 50 /home/ubuntu/app.log
