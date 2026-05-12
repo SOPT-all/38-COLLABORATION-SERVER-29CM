@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.sopt.global.entity.BaseTimeEntity;
 
 @Entity
@@ -34,9 +35,11 @@ public class Product extends BaseTimeEntity {
     @Column(nullable = false)
     private int price;
 
+    @ColumnDefault("0")
     @Column(nullable = false)
     private int saleRate;
 
+    @ColumnDefault("0")
     @Column(nullable = false)
     private int likeCount;
 }
