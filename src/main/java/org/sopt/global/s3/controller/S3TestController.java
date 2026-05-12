@@ -12,6 +12,7 @@ import org.sopt.global.code.GlobalSuccessCode;
 import org.sopt.global.response.CommonApiResponse;
 import org.sopt.global.s3.service.S3Service;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 
+@Profile("!prod")
 @Tag(name = "S3 Test", description = "S3 연결 테스트 API")
 @RestController
 @RequestMapping("/api/v1/test/s3")

@@ -3,7 +3,7 @@ name: CD
 on:
   push:
     branches:
-      - develop
+      - 12-feat/s3
 
   workflow_dispatch:
 
@@ -39,10 +39,19 @@ jobs:
 
       - name: Deploy jar on EC2
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: DB_HOST,DB_PORT,DB_NAME,DB_USERNAME,DB_PASSWORD,S3_BUCKET,AWS_REGION
           script: |
             APP_DIR=/home/ubuntu/app
             LOG_FILE=/home/ubuntu/app.log
@@ -59,16 +68,9 @@ jobs:
 
             JAR_PATH=$(ls "$APP_DIR"/*.jar | head -n 1)
 
-            DB_HOST=${{ secrets.DB_HOST }} \
-            DB_PORT=${{ secrets.DB_PORT }} \
-            DB_NAME=${{ secrets.DB_NAME }} \
-            DB_USERNAME=${{ secrets.DB_USERNAME }} \
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-            S3_BUCKET=${{ secrets.S3_BUCKET }} \
-            AWS_REGION=${{ secrets.AWS_REGION }} \
             nohup java -jar "$JAR_PATH" --spring.profiles.active=prod > "$LOG_FILE" 2>&1 &
 
             echo $! > "$PID_FILE"
 
-            sleep 10
+            curl --fail --retry 10 --retry-delay 3 http://localhost:8080/api/v1/health
             tail -n 50 "$LOG_FILE"
