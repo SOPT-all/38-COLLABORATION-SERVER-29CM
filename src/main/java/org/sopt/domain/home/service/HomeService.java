@@ -28,6 +28,7 @@ import org.sopt.domain.product.domain.Product;
 import org.sopt.domain.product.domain.ProductTag;
 import org.sopt.domain.product.repository.ProductLikeRepository;
 import org.sopt.domain.product.repository.ProductTagRepository;
+import org.sopt.global.s3.service.S3Service;
 import org.sopt.global.support.cursor.CursorCodec;
 import org.sopt.global.support.pagination.PageInfoResponse;
 import org.sopt.global.support.pagination.PaginationValidator;
@@ -55,6 +56,7 @@ public class HomeService {
     private final SelectionProductRepository selectionProductRepository;
     private final ProductTagRepository productTagRepository;
     private final ProductLikeRepository productLikeRepository;
+    private final S3Service s3Service;
 
     public HomeMainResponse getHomeMain(String rawViewerType, String rawCursor, Integer rawSize) {
         ViewerType viewerType = viewerTypeResolver.resolve(rawViewerType);
@@ -65,8 +67,9 @@ public class HomeService {
                 MAX_SECTION_SIZE
         );
         HomeCursorPayload cursor = decodeCursor(rawCursor, viewerType);
+        Map<String, String> presignedUrlCache = new LinkedHashMap<>();
 
-        List<HomeShortcutResponse> shortcuts = getShortcuts();
+        List<HomeShortcutResponse> shortcuts = getShortcuts(presignedUrlCache);
         List<HomeSectionPageItem> fetchedSectionItems = getSectionPageItems(cursor, viewerType, size);
         boolean hasNext = fetchedSectionItems.size() > size;
         List<HomeSectionPageItem> sectionPageItems = fetchedSectionItems.stream()
@@ -76,7 +79,7 @@ public class HomeService {
                 .map(HomeSectionPageItem::section)
                 .toList();
 
-        List<HomeSectionResponse> sectionResponses = getSectionResponses(sections, viewerType);
+        List<HomeSectionResponse> sectionResponses = getSectionResponses(sections, viewerType, presignedUrlCache);
         PageInfoResponse pageInfo = createPageInfo(sectionPageItems, hasNext, size, viewerType);
 
         return new HomeMainResponse(shortcuts, sectionResponses, pageInfo);
@@ -92,10 +95,10 @@ public class HomeService {
         return cursor;
     }
 
-    private List<HomeShortcutResponse> getShortcuts() {
+    private List<HomeShortcutResponse> getShortcuts(Map<String, String> presignedUrlCache) {
         return homeShortcutRepository.findAllByOrderByDisplayOrderAscIdAsc()
                 .stream()
-                .map(this::toShortcutResponse)
+                .map(shortcut -> toShortcutResponse(shortcut, presignedUrlCache))
                 .toList();
     }
 
@@ -136,7 +139,11 @@ public class HomeService {
                 .toList();
     }
 
-    private List<HomeSectionResponse> getSectionResponses(List<HomeSection> sections, ViewerType viewerType) {
+    private List<HomeSectionResponse> getSectionResponses(
+            List<HomeSection> sections,
+            ViewerType viewerType,
+            Map<String, String> presignedUrlCache
+    ) {
         if (sections.isEmpty()) {
             return List.of();
         }
@@ -167,7 +174,8 @@ public class HomeService {
                         selectionProductsBySelectionId,
                         tagsByProductId,
                         likedProductIds,
-                        viewerType
+                        viewerType,
+                        presignedUrlCache
                 ))
                 .toList();
     }
@@ -226,7 +234,8 @@ public class HomeService {
             Map<Long, List<SelectionProduct>> selectionProductsBySelectionId,
             Map<Long, List<String>> tagsByProductId,
             Set<Long> likedProductIds,
-            ViewerType viewerType
+            ViewerType viewerType,
+            Map<String, String> presignedUrlCache
     ) {
         List<HomeSelection> sortedSelections = sortSelections(
                 selectionsBySectionId.getOrDefault(section.getId(), List.of()),
@@ -241,7 +250,8 @@ public class HomeService {
                         selectionProductsBySelectionId,
                         tagsByProductId,
                         likedProductIds,
-                        viewerType
+                        viewerType,
+                        presignedUrlCache
                 ))
                 .toList();
 
@@ -249,7 +259,7 @@ public class HomeService {
                 section.getId(),
                 section.getTitle(),
                 section.getDescription(),
-                section.getHeroImageUrl(),
+                presignImageUrl(section.getHeroImageUrl(), presignedUrlCache),
                 selections
         );
     }
@@ -259,7 +269,8 @@ public class HomeService {
             Map<Long, List<SelectionProduct>> selectionProductsBySelectionId,
             Map<Long, List<String>> tagsByProductId,
             Set<Long> likedProductIds,
-            ViewerType viewerType
+            ViewerType viewerType,
+            Map<String, String> presignedUrlCache
     ) {
         List<SelectionProduct> sortedSelectionProducts = sortSelectionProducts(
                 selectionProductsBySelectionId.getOrDefault(selection.getId(), List.of()),
@@ -271,13 +282,14 @@ public class HomeService {
                 .map(selectionProduct -> toProductResponse(
                         selectionProduct,
                         tagsByProductId,
-                        likedProductIds
+                        likedProductIds,
+                        presignedUrlCache
                 ))
                 .toList();
 
         return new HomeSelectionResponse(
                 selection.getId(),
-                selection.getImageUrl(),
+                presignImageUrl(selection.getImageUrl(), presignedUrlCache),
                 selection.getTitle(),
                 selection.getDescription(),
                 products
@@ -354,14 +366,15 @@ public class HomeService {
     private HomeProductResponse toProductResponse(
             SelectionProduct selectionProduct,
             Map<Long, List<String>> tagsByProductId,
-            Set<Long> likedProductIds
+            Set<Long> likedProductIds,
+            Map<String, String> presignedUrlCache
     ) {
         Product product = selectionProduct.getProduct();
         Long productId = product.getId();
 
         return new HomeProductResponse(
                 productId,
-                product.getImageUrl(),
+                presignImageUrl(product.getImageUrl(), presignedUrlCache),
                 product.getBrandName(),
                 product.getName(),
                 product.getSaleRate(),
@@ -372,13 +385,17 @@ public class HomeService {
         );
     }
 
-    private HomeShortcutResponse toShortcutResponse(HomeShortcut shortcut) {
+    private HomeShortcutResponse toShortcutResponse(HomeShortcut shortcut, Map<String, String> presignedUrlCache) {
         return new HomeShortcutResponse(
                 shortcut.getId(),
                 shortcut.getName(),
-                shortcut.getImageUrl(),
+                presignImageUrl(shortcut.getImageUrl(), presignedUrlCache),
                 shortcut.getCategoryId()
         );
+    }
+
+    private String presignImageUrl(String objectKey, Map<String, String> presignedUrlCache) {
+        return presignedUrlCache.computeIfAbsent(objectKey, s3Service::generatePresignedUrl);
     }
 
     private PageInfoResponse createPageInfo(
