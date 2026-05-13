@@ -2,6 +2,7 @@ package org.sopt.domain.showcase.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import org.sopt.domain.showcase.dto.response.ShowcaseResponse;
 import org.sopt.domain.showcase.dto.response.ShowcaseSectionResponse;
 import org.sopt.domain.showcase.repository.ShowcaseRepository;
 import org.sopt.domain.showcase.repository.ShowcaseSectionRepository;
+import org.sopt.global.s3.service.S3Service;
 import org.sopt.global.support.cursor.CursorCodec;
 import org.sopt.global.support.pagination.PageInfoResponse;
 import org.sopt.global.support.pagination.PaginationValidator;
@@ -34,6 +36,7 @@ public class ShowcaseService {
     private final ShowcaseRepository showcaseRepository;
     private final ShowcaseSectionRepository showcaseSectionRepository;
     private final CursorCodec cursorCodec;
+    private final S3Service s3Service;
 
     public ShowcaseResponse getShowcases(String themeStr, String cursorStr, Integer rawSize) {
         int size = PaginationValidator.resolveAndValidateSize(rawSize, DEFAULT_SIZE, MIN_SIZE, MAX_SIZE);
@@ -41,9 +44,10 @@ public class ShowcaseService {
         ShowcaseCursorPayload cursor = cursorStr != null
                 ? cursorCodec.decode(cursorStr, ShowcaseCursorPayload.class)
                 : null;
+        Map<String, String> presignedUrlCache = new LinkedHashMap<>();
 
         List<ShowcaseItemResponse> featured = cursor == null
-                ? fetchFeatured(theme)
+                ? fetchFeatured(theme, presignedUrlCache)
                 : List.of();
 
         List<ShowcaseSection> fetchedSections = fetchSectionPage(theme, cursor, size + 1);
@@ -57,7 +61,7 @@ public class ShowcaseService {
                 : showcaseRepository.findBySectionIds(sectionIds);
 
         String nextCursor = hasNext ? encodeSectionCursor(pageSections.get(pageSections.size() - 1)) : null;
-        List<ShowcaseSectionResponse> sections = buildSectionResponses(pageSections, showcases);
+        List<ShowcaseSectionResponse> sections = buildSectionResponses(pageSections, showcases, presignedUrlCache);
 
         return new ShowcaseResponse(featured, sections, new PageInfoResponse(nextCursor, hasNext, size));
     }
@@ -69,7 +73,7 @@ public class ShowcaseService {
         return themeStr.toUpperCase();
     }
 
-    private List<ShowcaseItemResponse> fetchFeatured(String theme) {
+    private List<ShowcaseItemResponse> fetchFeatured(String theme, Map<String, String> presignedUrlCache) {
         List<Showcase> items = theme != null
                 ? showcaseRepository.findFeaturedByTheme(theme)
                 : showcaseRepository.findFeaturedAll();
@@ -84,7 +88,7 @@ public class ShowcaseService {
         }
 
         return items.stream()
-                .map(this::toShowcaseItemResponse)
+                .map(showcase -> toShowcaseItemResponse(showcase, presignedUrlCache))
                 .toList();
     }
 
@@ -107,32 +111,49 @@ public class ShowcaseService {
         ));
     }
 
-    private List<ShowcaseSectionResponse> buildSectionResponses(List<ShowcaseSection> sections, List<Showcase> showcases) {
+    private List<ShowcaseSectionResponse> buildSectionResponses(
+            List<ShowcaseSection> sections,
+            List<Showcase> showcases,
+            Map<String, String> presignedUrlCache
+    ) {
         Map<Long, List<Showcase>> bySectionId = showcases.stream()
                 .collect(Collectors.groupingBy(s -> s.getSection().getId()));
 
         return sections.stream()
-                .map(sec -> toSectionResponse(sec, bySectionId.getOrDefault(sec.getId(), List.of())))
+                .map(sec -> toSectionResponse(sec, bySectionId.getOrDefault(sec.getId(), List.of()), presignedUrlCache))
                 .toList();
     }
 
-    private ShowcaseSectionResponse toSectionResponse(ShowcaseSection section, List<Showcase> showcases) {
+    private ShowcaseSectionResponse toSectionResponse(
+            ShowcaseSection section,
+            List<Showcase> showcases,
+            Map<String, String> presignedUrlCache
+    ) {
         return new ShowcaseSectionResponse(
                 section.getId(),
                 section.getTheme(),
                 section.getTitle(),
-                showcases.stream().map(this::toShowcaseItemResponse).toList()
+                showcases.stream()
+                        .map(showcase -> toShowcaseItemResponse(showcase, presignedUrlCache))
+                        .toList()
         );
     }
 
-    private ShowcaseItemResponse toShowcaseItemResponse(Showcase showcase) {
+    private ShowcaseItemResponse toShowcaseItemResponse(
+            Showcase showcase,
+            Map<String, String> presignedUrlCache
+    ) {
         return new ShowcaseItemResponse(
                 showcase.getId(),
                 showcase.getTitle(),
                 showcase.getDescription(),
-                showcase.getImageUrl(),
+                presignImageUrl(showcase.getImageUrl(), presignedUrlCache),
                 showcase.getStartDate(),
                 showcase.getEndDate()
         );
+    }
+
+    private String presignImageUrl(String objectKey, Map<String, String> presignedUrlCache) {
+        return presignedUrlCache.computeIfAbsent(objectKey, s3Service::generatePresignedUrl);
     }
 }
