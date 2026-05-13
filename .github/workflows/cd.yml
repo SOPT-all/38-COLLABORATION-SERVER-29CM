@@ -3,7 +3,7 @@ name: CD
 on:
   push:
     branches:
-      - 32-chore/cd
+      - main
 
   workflow_dispatch:
 
