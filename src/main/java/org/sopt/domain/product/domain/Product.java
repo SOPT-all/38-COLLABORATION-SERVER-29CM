@@ -42,4 +42,14 @@ public class Product extends BaseTimeEntity {
     @ColumnDefault("0")
     @Column(nullable = false)
     private int likeCount;
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        if (likeCount > 0) {
+            this.likeCount--;
+        }
+    }
 }
