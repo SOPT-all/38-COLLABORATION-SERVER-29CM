@@ -1,6 +1,7 @@
 package org.sopt.domain.home.service;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,27 +64,32 @@ public class HomeService {
                 MIN_SECTION_SIZE,
                 MAX_SECTION_SIZE
         );
-        HomeCursorPayload cursor = decodeCursor(rawCursor);
+        HomeCursorPayload cursor = decodeCursor(rawCursor, viewerType);
 
         List<HomeShortcutResponse> shortcuts = getShortcuts();
-        List<HomeSection> fetchedSections = getSections(cursor, size);
-        boolean hasNext = fetchedSections.size() > size;
-        List<HomeSection> sections = fetchedSections.stream()
+        List<HomeSectionPageItem> fetchedSectionItems = getSectionPageItems(cursor, viewerType, size);
+        boolean hasNext = fetchedSectionItems.size() > size;
+        List<HomeSectionPageItem> sectionPageItems = fetchedSectionItems.stream()
                 .limit(size)
+                .toList();
+        List<HomeSection> sections = sectionPageItems.stream()
+                .map(HomeSectionPageItem::section)
                 .toList();
 
         List<HomeSectionResponse> sectionResponses = getSectionResponses(sections, viewerType);
-        PageInfoResponse pageInfo = createPageInfo(sections, hasNext, size);
+        PageInfoResponse pageInfo = createPageInfo(sectionPageItems, hasNext, size, viewerType);
 
         return new HomeMainResponse(shortcuts, sectionResponses, pageInfo);
     }
 
-    private HomeCursorPayload decodeCursor(String rawCursor) {
+    private HomeCursorPayload decodeCursor(String rawCursor, ViewerType viewerType) {
         if (rawCursor == null) {
             return null;
         }
 
-        return cursorCodec.decode(rawCursor, HomeCursorPayload.class);
+        HomeCursorPayload cursor = cursorCodec.decode(rawCursor, HomeCursorPayload.class);
+        cursor.validateViewerType(viewerType);
+        return cursor;
     }
 
     private List<HomeShortcutResponse> getShortcuts() {
@@ -93,7 +99,15 @@ public class HomeService {
                 .toList();
     }
 
-    private List<HomeSection> getSections(HomeCursorPayload cursor, int size) {
+    private List<HomeSectionPageItem> getSectionPageItems(HomeCursorPayload cursor, ViewerType viewerType, int size) {
+        if (viewerType == ViewerType.USER) {
+            return getUserSectionPageItems(cursor, size);
+        }
+
+        return getGuestSectionPageItems(cursor, size);
+    }
+
+    private List<HomeSectionPageItem> getGuestSectionPageItems(HomeCursorPayload cursor, int size) {
         Integer cursorDisplayOrder = cursor == null ? null : cursor.displayOrder();
         Long cursorSectionId = cursor == null ? null : cursor.sectionId();
 
@@ -101,7 +115,25 @@ public class HomeService {
                 cursorDisplayOrder,
                 cursorSectionId,
                 PageRequest.of(0, size + 1)
-        );
+        ).stream()
+                .map(section -> new HomeSectionPageItem(section, null))
+                .toList();
+    }
+
+    private List<HomeSectionPageItem> getUserSectionPageItems(HomeCursorPayload cursor, int size) {
+        Long cursorLikedProductCount = cursor == null ? null : cursor.likedProductCount();
+        Integer cursorDisplayOrder = cursor == null ? null : cursor.displayOrder();
+        Long cursorSectionId = cursor == null ? null : cursor.sectionId();
+
+        return homeSectionRepository.findUserPageAfterCursor(
+                TEST_USER_ID,
+                cursorLikedProductCount,
+                cursorDisplayOrder,
+                cursorSectionId,
+                PageRequest.of(0, size + 1)
+        ).stream()
+                .map(row -> new HomeSectionPageItem(row.section(), row.likedProductCount()))
+                .toList();
     }
 
     private List<HomeSectionResponse> getSectionResponses(List<HomeSection> sections, ViewerType viewerType) {
@@ -134,7 +166,8 @@ public class HomeService {
                         selectionsBySectionId,
                         selectionProductsBySelectionId,
                         tagsByProductId,
-                        likedProductIds
+                        likedProductIds,
+                        viewerType
                 ))
                 .toList();
     }
@@ -192,16 +225,23 @@ public class HomeService {
             Map<Long, List<HomeSelection>> selectionsBySectionId,
             Map<Long, List<SelectionProduct>> selectionProductsBySelectionId,
             Map<Long, List<String>> tagsByProductId,
-            Set<Long> likedProductIds
+            Set<Long> likedProductIds,
+            ViewerType viewerType
     ) {
-        List<HomeSelectionResponse> selections = selectionsBySectionId
-                .getOrDefault(section.getId(), List.of())
+        List<HomeSelection> sortedSelections = sortSelections(
+                selectionsBySectionId.getOrDefault(section.getId(), List.of()),
+                selectionProductsBySelectionId,
+                likedProductIds,
+                viewerType
+        );
+        List<HomeSelectionResponse> selections = sortedSelections
                 .stream()
                 .map(selection -> toSelectionResponse(
                         selection,
                         selectionProductsBySelectionId,
                         tagsByProductId,
-                        likedProductIds
+                        likedProductIds,
+                        viewerType
                 ))
                 .toList();
 
@@ -218,10 +258,15 @@ public class HomeService {
             HomeSelection selection,
             Map<Long, List<SelectionProduct>> selectionProductsBySelectionId,
             Map<Long, List<String>> tagsByProductId,
-            Set<Long> likedProductIds
+            Set<Long> likedProductIds,
+            ViewerType viewerType
     ) {
-        List<HomeProductResponse> products = selectionProductsBySelectionId
-                .getOrDefault(selection.getId(), List.of())
+        List<SelectionProduct> sortedSelectionProducts = sortSelectionProducts(
+                selectionProductsBySelectionId.getOrDefault(selection.getId(), List.of()),
+                likedProductIds,
+                viewerType
+        );
+        List<HomeProductResponse> products = sortedSelectionProducts
                 .stream()
                 .map(selectionProduct -> toProductResponse(
                         selectionProduct,
@@ -237,6 +282,73 @@ public class HomeService {
                 selection.getDescription(),
                 products
         );
+    }
+
+    private List<HomeSelection> sortSelections(
+            List<HomeSelection> selections,
+            Map<Long, List<SelectionProduct>> selectionProductsBySelectionId,
+            Set<Long> likedProductIds,
+            ViewerType viewerType
+    ) {
+        Comparator<HomeSelection> comparator = Comparator
+                .comparingInt(HomeSelection::getDisplayOrder)
+                .thenComparing(HomeSelection::getId);
+
+        if (viewerType == ViewerType.USER) {
+            comparator = Comparator
+                    .comparingLong((HomeSelection selection) -> countLikedProducts(
+                            selection,
+                            selectionProductsBySelectionId,
+                            likedProductIds
+                    ))
+                    .reversed()
+                    .thenComparingInt(HomeSelection::getDisplayOrder)
+                    .thenComparing(HomeSelection::getId);
+        }
+
+        return selections.stream()
+                .sorted(comparator)
+                .toList();
+    }
+
+    private long countLikedProducts(
+            HomeSelection selection,
+            Map<Long, List<SelectionProduct>> selectionProductsBySelectionId,
+            Set<Long> likedProductIds
+    ) {
+        return selectionProductsBySelectionId.getOrDefault(selection.getId(), List.of())
+                .stream()
+                .filter(selectionProduct -> likedProductIds.contains(selectionProduct.getProductId()))
+                .count();
+    }
+
+    private List<SelectionProduct> sortSelectionProducts(
+            List<SelectionProduct> selectionProducts,
+            Set<Long> likedProductIds,
+            ViewerType viewerType
+    ) {
+        Comparator<SelectionProduct> comparator = Comparator
+                .comparingInt((SelectionProduct selectionProduct) -> selectionProduct.getProduct().getLikeCount())
+                .reversed()
+                .thenComparing(SelectionProduct::getProductId);
+
+        if (viewerType == ViewerType.USER) {
+            comparator = Comparator
+                    .comparing((SelectionProduct selectionProduct) -> likedProductIds.contains(
+                            selectionProduct.getProductId()
+                    ))
+                    .reversed()
+                    .thenComparing(
+                            Comparator.comparingInt(
+                                    (SelectionProduct selectionProduct) -> selectionProduct.getProduct().getLikeCount()
+                            ).reversed()
+                    )
+                    .thenComparing(SelectionProduct::getProductId);
+        }
+
+        return selectionProducts.stream()
+                .sorted(comparator)
+                .toList();
     }
 
     private HomeProductResponse toProductResponse(
@@ -269,17 +381,39 @@ public class HomeService {
         );
     }
 
-    private PageInfoResponse createPageInfo(List<HomeSection> sections, boolean hasNext, int size) {
+    private PageInfoResponse createPageInfo(
+            List<HomeSectionPageItem> sectionPageItems,
+            boolean hasNext,
+            int size,
+            ViewerType viewerType
+    ) {
         String nextCursor = null;
-        if (hasNext && !sections.isEmpty()) {
-            HomeSection lastSection = sections.get(sections.size() - 1);
-            nextCursor = cursorCodec.encode(new HomeCursorPayload(
-                    lastSection.getDisplayOrder(),
-                    lastSection.getId()
-            ));
+        if (hasNext && !sectionPageItems.isEmpty()) {
+            HomeSectionPageItem lastSectionPageItem = sectionPageItems.get(sectionPageItems.size() - 1);
+            HomeSection lastSection = lastSectionPageItem.section();
+            nextCursor = cursorCodec.encode(createCursorPayload(lastSectionPageItem, lastSection, viewerType));
         }
 
         return new PageInfoResponse(nextCursor, hasNext, size);
+    }
+
+    private HomeCursorPayload createCursorPayload(
+            HomeSectionPageItem lastSectionPageItem,
+            HomeSection lastSection,
+            ViewerType viewerType
+    ) {
+        if (viewerType == ViewerType.USER) {
+            return HomeCursorPayload.user(
+                    lastSectionPageItem.likedProductCount(),
+                    lastSection.getDisplayOrder(),
+                    lastSection.getId()
+            );
+        }
+
+        return HomeCursorPayload.guest(
+                lastSection.getDisplayOrder(),
+                lastSection.getId()
+        );
     }
 
     private <T> Map<Long, List<T>> groupBy(List<T> values, Function<T, Long> classifier) {
@@ -289,5 +423,11 @@ public class HomeService {
                         LinkedHashMap::new,
                         Collectors.toList()
                 ));
+    }
+
+    private record HomeSectionPageItem(
+            HomeSection section,
+            Long likedProductCount
+    ) {
     }
 }
