@@ -124,8 +124,9 @@ public class HomeService {
         Map<Long, List<SelectionProduct>> selectionProductsBySelectionId = getSelectionProductsBySelectionId(
                 selectionIds
         );
-        Map<Long, List<String>> tagsByProductId = getTagsByProductId(selectionProductsBySelectionId.values());
-        Set<Long> likedProductIds = getLikedProductIds(viewerType, selectionProductsBySelectionId.values());
+        List<Long> productIds = getProductIds(selectionProductsBySelectionId.values());
+        Map<Long, List<String>> tagsByProductId = getTagsByProductId(productIds);
+        Set<Long> likedProductIds = getLikedProductIds(viewerType, productIds);
 
         return sections.stream()
                 .map(section -> toSectionResponse(
@@ -149,8 +150,7 @@ public class HomeService {
         );
     }
 
-    private Map<Long, List<String>> getTagsByProductId(Collection<List<SelectionProduct>> groupedSelectionProducts) {
-        List<Long> productIds = getProductIds(groupedSelectionProducts);
+    private Map<Long, List<String>> getTagsByProductId(List<Long> productIds) {
         if (productIds.isEmpty()) {
             return Map.of();
         }
@@ -166,13 +166,12 @@ public class HomeService {
 
     private Set<Long> getLikedProductIds(
             ViewerType viewerType,
-            Collection<List<SelectionProduct>> groupedSelectionProducts
+            List<Long> productIds
     ) {
         if (viewerType == ViewerType.GUEST) {
             return Set.of();
         }
 
-        List<Long> productIds = getProductIds(groupedSelectionProducts);
         if (productIds.isEmpty()) {
             return Set.of();
         }
