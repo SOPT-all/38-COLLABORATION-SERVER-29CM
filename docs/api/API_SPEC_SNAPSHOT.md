@@ -2,9 +2,9 @@
 
 ## 1. 스냅샷 정보
 
-- Snapshot date: 2026-05-10
-- Source: 개인 Notion 워크스페이스의 API 명세서
-- 사용자 확인: 개인 Notion 문서는 팀스페이스 API 명세서와 동기화된 상태다.
+- Snapshot date: 2026-05-13
+- Source: 팀스페이스 Notion API 명세서
+- 사용자 확인: 홈 메인 조회 정렬 및 cursor 정책 변경사항을 팀스페이스 Notion API 명세서에 반영한 상태다.
 - 실제 SSoT: 팀스페이스 Notion API 명세서
 
 이 문서는 AI와 로컬 개발자가 외부 권한 없이 API 계약을 확인하기 위한 dated snapshot이다.
@@ -106,7 +106,12 @@
 
 - cursor는 opaque string이다.
 - 클라이언트는 cursor를 해석하지 않고 응답받은 값을 그대로 다음 요청에 전달한다.
-- 서버 내부적으로 `displayOrder + id` 기준 값을 Base64 인코딩해 생성한다.
+- 서버 내부적으로 정렬 기준 값을 Base64 인코딩해 생성한다.
+- 기본 cursor 기준은 `displayOrder + id`다.
+- 홈 메인 조회 cursor는 요청 `viewerType`에 종속된다.
+- 홈 메인 조회의 `viewerType=guest` cursor는 `viewerType`, `displayOrder`, `sectionId`를 포함한다.
+- 홈 메인 조회의 `viewerType=user` cursor는 `viewerType`, `likedProductCount`, `displayOrder`, `sectionId`를 포함한다.
+- 홈 메인 조회에서 요청 `viewerType`과 cursor 내부 `viewerType`이 다르면 `400 GLB-E001`을 반환한다.
 - 잘못된 cursor는 `400 GLB-E001`을 반환한다.
 - 다음 데이터가 없으면 `pageInfo.hasNext=false`, `pageInfo.nextCursor=null`로 응답한다.
 
@@ -178,7 +183,7 @@
 | Name | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
 | `viewerType` | String | No | `guest` | `user`, `guest`만 허용 |
-| `cursor` | String | No | 없음 | 다음 메인 피드 섹션 조회 기준 opaque cursor |
+| `cursor` | String | No | 없음 | 다음 메인 피드 섹션 조회 기준 opaque cursor. 요청 `viewerType`에 종속됨 |
 | `size` | Integer | No | `5` | 한 번에 조회할 메인 피드 섹션 개수. 최소 `1`, 최대 `20` |
 
 ### Response Data
@@ -223,7 +228,7 @@
     }
   ],
   "pageInfo": {
-    "nextCursor": "eyJkaXNwbGF5T3JkZXIiOjEyLCJzZWN0aW9uSWQiOjEyfQ==",
+    "nextCursor": "eyJ2aWV3ZXJUeXBlIjoiZ3Vlc3QiLCJsaWtlZFByb2R1Y3RDb3VudCI6bnVsbCwiZGlzcGxheU9yZGVyIjoyLCJzZWN0aW9uSWQiOjJ9",
     "hasNext": true,
     "size": 5
   }
@@ -273,12 +278,21 @@
 - 홈 캐러셀은 별도 API에서 조회하며, 본 API 응답에는 포함하지 않는다.
 - 숏컷은 nav-bar 카테고리와 중복될 수 있으나, 홈 화면 구성 데이터로 별도 관리한다.
 - `viewerType=guest`인 경우 상품의 `isLiked`는 항상 `false`다.
+- `viewerType=guest`인 경우 섹션과 셀렉션은 기존 노출 순서대로 응답한다.
+- `viewerType=guest`인 경우 상품은 좋아요 수 내림차순, 상품 ID 오름차순으로 정렬한다.
 - `viewerType=user`는 seed 데이터에 등록된 단일 테스트 사용자 `id=1`을 의미하며, 해당 사용자 기준으로 `isLiked`를 계산한다.
+- `viewerType=user`인 경우 섹션은 해당 섹션에 포함된 좋아요 상품 수 내림차순으로 정렬하고, 동률이면 기존 섹션 노출 순서를 따른다.
+- `viewerType=user`인 경우 셀렉션은 해당 셀렉션에 포함된 좋아요 상품 수 내림차순으로 정렬하고, 동률이면 기존 셀렉션 노출 순서를 따른다.
+- `viewerType=user`인 경우 상품은 좋아요된 상품 우선, 좋아요 수 내림차순, 상품 ID 오름차순으로 정렬한다.
 - 상품의 `price`는 최종 판매가다.
 - 상품의 `saleRate`는 할인율이며, 할인 정보가 없으면 `0`으로 응답한다.
 - 상품의 `tags`는 서버가 의미를 해석하지 않는 seed 기반 자유 문자열 배열이다.
 - 무한스크롤 요청 중에는 최초 요청과 동일한 `viewerType`을 유지한다.
-- 로그인/비로그인 상태에 따라 main view 콘텐츠의 상품 노출 순서가 달라질 수 있다. 응답 형식은 동일하다.
+- 홈 메인 조회의 `cursor`는 요청 `viewerType`에 종속된다. `guest` cursor를 `user` 요청에 사용하거나 반대로 사용하는 경우 `400 GLB-E001`을 반환한다.
+- `viewerType=guest` cursor는 `viewerType`, `displayOrder`, `sectionId` 기준 값을 Base64 인코딩해 생성한다.
+- `viewerType=user` cursor는 `viewerType`, `likedProductCount`, `displayOrder`, `sectionId` 기준 값을 Base64 인코딩해 생성한다.
+- `viewerType=user` 요청 중 좋아요 상태가 변경되면 cursor pagination의 정렬 snapshot 일관성은 보장하지 않는다.
+- 로그인/비로그인 상태에 따라 main view 콘텐츠의 섹션, 셀렉션, 상품 노출 순서가 달라질 수 있다. 응답 형식은 동일하다.
 
 ## 9. 쇼케이스 피드 조회
 
