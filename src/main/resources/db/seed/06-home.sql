@@ -1,55 +1,111 @@
--- 임시 더미데이터. 기획 전달 JSON 수신 후 교체 예정.
+-- Auto-generated from dummy/data/home.json
+-- Carousels / Shortcuts / Sections / Selections / Selection-Products
+
+-- home_carousels (10) — 캐러셀 엔티티/테이블 추가 후 주석 해제 예정
+-- INSERT INTO home_carousels (id, image_url, alt_text, display_order)
+-- VALUES
+--     (1, 'https://29cm.p-e.kr/images/home/carousel_01.png', 'SUMMER SIGNAL', 1),
+--     (2, 'https://29cm.p-e.kr/images/home/carousel_02.jpg', '수요입점회', 2),
+--     (3, 'https://29cm.p-e.kr/images/home/carousel_03.jpg', 'NIKE', 3),
+--     (4, 'https://29cm.p-e.kr/images/home/carousel_04.jpg', 'RONRON', 4),
+--     (5, 'https://29cm.p-e.kr/images/home/carousel_05.jpg', 'EASTLOGUE PERMANENT×MAZIUNTITLED', 5),
+--     (6, 'https://29cm.p-e.kr/images/home/carousel_06.jpg', 'FINCA', 6),
+--     (7, 'https://29cm.p-e.kr/images/home/carousel_07.jpg', 'KEEN', 7),
+--     (8, 'https://29cm.p-e.kr/images/home/carousel_08.jpg', 'AERSE', 8),
+--     (9, 'https://29cm.p-e.kr/images/home/carousel_09.png', '714CENTER', 9),
+--     (10, 'https://29cm.p-e.kr/images/home/carousel_10.png', 'SNOWPEAK APPAREL', 10);
+
+-- home_shortcuts (10)
 INSERT INTO home_shortcuts (id, category_id, name, image_url, display_order)
-VALUES (1, 1, 'BEST', 'https://example.com/home/shortcut-best.png', 1),
-       (2, 2, 'WOMEN', 'https://example.com/home/shortcut-women.png', 2),
-       (3, 3, 'MEN', 'https://example.com/home/shortcut-men.png', 3),
-       (4, 4, 'INTERIOR', 'https://example.com/home/shortcut-interior.png', 4),
-       (5, 8, 'BEAUTY', 'https://example.com/home/shortcut-beauty.png', 5),
-       (6, 11, 'KIDS', 'https://example.com/home/shortcut-kids.png', 6);
+VALUES
+    (1, 3, 'BEST', 'https://29cm.p-e.kr/images/home/best.png', 1),
+    (2, 2, 'MEN', 'https://29cm.p-e.kr/images/home/men.png', 2),
+    (3, 12, 'CULTURE', 'https://29cm.p-e.kr/images/home/culture.png', 3),
+    (4, 5, 'KITCHEN', 'https://29cm.p-e.kr/images/home/kitchen.png', 4),
+    (5, 6, 'ELECTRONICS', 'https://29cm.p-e.kr/images/home/electronics.png', 5),
+    (6, 7, 'DIGITAL', 'https://29cm.p-e.kr/images/home/digital.png', 6),
+    (7, 8, 'BEAUTY', 'https://29cm.p-e.kr/images/home/beauty.png', 7),
+    (8, 9, 'FOOD', 'https://29cm.p-e.kr/images/home/food.png', 8),
+    (9, 10, 'LEISURE', 'https://29cm.p-e.kr/images/home/leisure.png', 9),
+    (10, 11, 'KIDS', 'https://29cm.p-e.kr/images/home/kids.png', 10);
 
-ALTER TABLE home_shortcuts AUTO_INCREMENT = 7;
-
+-- home_sections (14)
 INSERT INTO home_sections (id, title, description, hero_image_url, display_order)
-VALUES (1, '매일 스며드는 스타일', '일상에 자연스럽게 스며드는 옷', 'https://example.com/home/section-1-main.png', 1),
-       (2, '여름을 준비하는 방식', '가볍고 선명한 계절의 선택', 'https://example.com/home/section-2-main.png', 2),
-       (3, '집 안의 작은 변화', '공간의 분위기를 바꾸는 오브제', 'https://example.com/home/section-3-main.png', 3),
-       (4, '아이를 위한 부드러운 하루', '편안한 움직임을 위한 키즈 셀렉션', 'https://example.com/home/section-4-main.png', 4),
-       (5, '매일 쓰는 감각', '생활에 오래 남는 작은 물건들', 'https://example.com/home/section-5-main.png', 5),
-       (6, '차분한 기록의 시간', '책상 위에 두고 싶은 문구 셀렉션', 'https://example.com/home/section-6-main.png', 6);
+VALUES
+    (1, '문화적 영감의 파편', '절제된 그래픽에 담아낸 사파리스팟과 1011 갤러리의 독창적 아카이브를 소개해요.', 'https://29cm.p-e.kr/images/home/section_01.jpg', 1),
+    (2, '제현경의 추천', '셔츠, 드레스, 데님까지. 패션 인플루언서 제현경이 로우클래식의 감각적인 여름을 소개해요.', 'https://29cm.p-e.kr/images/home/section_02.jpg', 2),
+    (3, '시간이 빚어낸', '절제된 실루엣과 차분한 톤으로 완성하는 여름 컬렉션을 만나보세요.', 'https://29cm.p-e.kr/images/home/section_03.jpg', 3),
+    (4, '절제된 미래', '언어펙티드와 프로그레스의 세 번째 협업 컬렉션을 소개해요.', 'https://29cm.p-e.kr/images/home/section_04.jpg', 4),
+    (5, '손끝에서 피어난', '소일베이커의 아름다운 감성으로 일상을 채워요.', 'https://29cm.p-e.kr/images/home/section_05.jpg', 5),
+    (6, '나폴리의 산들바람', '스치는 바람처럼 여유로운 여름을 담은 지노키오의 여름 컬렉션을 같이 구경해요.', 'https://29cm.p-e.kr/images/home/section_06.jpg', 6),
+    (7, '여름을 신어요', '버켄스탁의 새로운 실루엣과 함께 여름 스타일을 완성해요.', 'https://29cm.p-e.kr/images/home/section_07.jpg', 7),
+    (8, '쿨링 시스템', '아이즈매거진의 시선으로 기록한 비브비브를 만나보세요.', 'https://29cm.p-e.kr/images/home/section_08.jpg', 8),
+    (9, '도시와 산을 잇는', '일상과 산행을 아우르는 아웃도어 상품을 특별 혜택으로 소개해요.', 'https://29cm.p-e.kr/images/home/section_09.jpg', 9),
+    (10, '시간을 입는 방법', '기본에 충실한 브론슨을 만나요.', 'https://29cm.p-e.kr/images/home/section_10.jpg', 10),
+    (11, '선물하기 좋은 시간', 'Apple Watch를 특별 혜택으로 만나요.', 'https://29cm.p-e.kr/images/home/section_11.jpg', 11),
+    (12, '특별한 관리', '오하입으로 특별한 헤어 관리를 시작하세요. 특별 혜택과 함께.', 'https://29cm.p-e.kr/images/home/section_12.jpg', 12),
+    (13, '특별한 기회', '29'' 머들 퍼퓸 14ml 출시 기념 단독 혜택을 만나보세요.', 'https://29cm.p-e.kr/images/home/section_13.jpg', 13),
+    (14, '견고함을 담은', '레드윙의 인기 부츠 컬렉션을 소개해요.', 'https://29cm.p-e.kr/images/home/section_14.jpg', 14);
 
-ALTER TABLE home_sections AUTO_INCREMENT = 7;
-
+-- home_selections (14)
 INSERT INTO home_selections (id, home_section_id, image_url, title, description, display_order)
-VALUES (11, 1, 'https://example.com/home/selection-11.png', '왕수빈이 고른 노티아', '편안함 속에 깃든 노티아의 스타일을 만나요.', 1),
-       (12, 1, 'https://example.com/home/selection-12.png', '루트파인더의 여름', '유연한 실루엣으로 준비하는 계절입니다.', 2),
-       (21, 2, 'https://example.com/home/selection-21.png', '가벼운 셔츠와 팬츠', '여름 옷장의 기본을 다시 고릅니다.', 1),
-       (22, 2, 'https://example.com/home/selection-22.png', '데일리 케어 루틴', '매일 손이 가는 산뜻한 케어 아이템입니다.', 2),
-       (31, 3, 'https://example.com/home/selection-31.png', '테이블 위의 오브제', '식탁에 차분한 감각을 더합니다.', 1),
-       (41, 4, 'https://example.com/home/selection-41.png', '로토토베베 키즈웨어', '아이의 하루에 맞춘 편안한 선택입니다.', 1),
-       (51, 5, 'https://example.com/home/selection-51.png', '매일 쓰는 생활용품', '욕실과 주방에 놓기 좋은 물건입니다.', 1),
-       (61, 6, 'https://example.com/home/selection-61.png', '스튜디오노트 문구', '기록하는 시간을 위한 데스크 아이템입니다.', 1);
+VALUES
+    (1, 1, 'https://29cm.p-e.kr/images/home/section_01.jpg', '문화적 영감의 파편', '절제된 그래픽에 담아낸 사파리스팟과 1011 갤러리의 독창적 아카이브를 소개해요.', 1),
+    (2, 2, 'https://29cm.p-e.kr/images/home/section_02.jpg', '제현경의 추천', '셔츠, 드레스, 데님까지. 패션 인플루언서 제현경이 로우클래식의 감각적인 여름을 소개해요.', 1),
+    (3, 3, 'https://29cm.p-e.kr/images/home/section_03.jpg', '시간이 빚어낸', '절제된 실루엣과 차분한 톤으로 완성하는 여름 컬렉션을 만나보세요.', 1),
+    (4, 4, 'https://29cm.p-e.kr/images/home/section_04.jpg', '절제된 미래', '언어펙티드와 프로그레스의 세 번째 협업 컬렉션을 소개해요.', 1),
+    (5, 5, 'https://29cm.p-e.kr/images/home/section_05.jpg', '손끝에서 피어난', '소일베이커의 아름다운 감성으로 일상을 채워요.', 1),
+    (6, 6, 'https://29cm.p-e.kr/images/home/section_06.jpg', '나폴리의 산들바람', '스치는 바람처럼 여유로운 여름을 담은 지노키오의 여름 컬렉션을 같이 구경해요.', 1),
+    (7, 7, 'https://29cm.p-e.kr/images/home/section_07.jpg', '여름을 신어요', '버켄스탁의 새로운 실루엣과 함께 여름 스타일을 완성해요.', 1),
+    (8, 8, 'https://29cm.p-e.kr/images/home/section_08.jpg', '쿨링 시스템', '아이즈매거진의 시선으로 기록한 비브비브를 만나보세요.', 1),
+    (9, 9, 'https://29cm.p-e.kr/images/home/section_09.jpg', '도시와 산을 잇는', '일상과 산행을 아우르는 아웃도어 상품을 특별 혜택으로 소개해요.', 1),
+    (10, 10, 'https://29cm.p-e.kr/images/home/section_10.jpg', '시간을 입는 방법', '기본에 충실한 브론슨을 만나요.', 1),
+    (11, 11, 'https://29cm.p-e.kr/images/home/section_11.jpg', '선물하기 좋은 시간', 'Apple Watch를 특별 혜택으로 만나요.', 1),
+    (12, 12, 'https://29cm.p-e.kr/images/home/section_12.jpg', '특별한 관리', '오하입으로 특별한 헤어 관리를 시작하세요. 특별 혜택과 함께.', 1),
+    (13, 13, 'https://29cm.p-e.kr/images/home/section_13.jpg', '특별한 기회', '29'' 머들 퍼퓸 14ml 출시 기념 단독 혜택을 만나보세요.', 1),
+    (14, 14, 'https://29cm.p-e.kr/images/home/section_14.jpg', '견고함을 담은', '레드윙의 인기 부츠 컬렉션을 소개해요.', 1);
 
-ALTER TABLE home_selections AUTO_INCREMENT = 62;
-
+-- selection_products (41)
 INSERT INTO selection_products (id, home_selection_id, product_id, display_order)
-VALUES (1, 11, 1001, 1),
-       (2, 11, 1002, 2),
-       (3, 11, 1004, 3),
-       (4, 12, 1003, 1),
-       (5, 12, 1004, 2),
-       (6, 12, 1002, 3),
-       (7, 21, 1002, 1),
-       (8, 21, 1001, 2),
-       (9, 21, 1003, 3),
-       (10, 22, 1009, 1),
-       (11, 22, 1010, 2),
-       (12, 31, 1007, 1),
-       (13, 31, 1008, 2),
-       (14, 41, 1005, 1),
-       (15, 41, 1006, 2),
-       (16, 51, 1009, 1),
-       (17, 51, 1008, 2),
-       (18, 61, 1011, 1),
-       (19, 61, 1012, 2);
-
-ALTER TABLE selection_products AUTO_INCREMENT = 20;
+VALUES
+    (1, 1, 3976683, 1),
+    (2, 1, 3976694, 2),
+    (3, 1, 3976696, 3),
+    (4, 2, 3880226, 1),
+    (5, 2, 3880394, 2),
+    (6, 2, 3880579, 3),
+    (7, 3, 3956948, 1),
+    (8, 3, 3956953, 2),
+    (9, 3, 3956954, 3),
+    (10, 4, 2095859, 1),
+    (11, 4, 3271567, 2),
+    (12, 5, 112034, 1),
+    (13, 5, 1564626, 2),
+    (14, 5, 3297929, 3),
+    (15, 6, 3966478, 1),
+    (16, 6, 3966598, 2),
+    (17, 6, 3966619, 3),
+    (18, 7, 3761535, 1),
+    (19, 7, 3862039, 2),
+    (20, 7, 3862040, 3),
+    (21, 8, 3952501, 1),
+    (22, 8, 3952566, 2),
+    (23, 8, 3952568, 3),
+    (24, 9, 2552622, 1),
+    (25, 9, 3829060, 2),
+    (26, 9, 3838425, 3),
+    (27, 10, 3354267, 1),
+    (28, 10, 3806772, 2),
+    (29, 10, 3806779, 3),
+    (30, 11, 3502745, 1),
+    (31, 11, 3502747, 2),
+    (32, 11, 3502795, 3),
+    (33, 12, 3951435, 1),
+    (34, 12, 3954903, 2),
+    (35, 12, 3954968, 3),
+    (36, 13, 3725257, 1),
+    (37, 13, 3725258, 2),
+    (38, 13, 3745924, 3),
+    (39, 14, 2234834, 1),
+    (40, 14, 2801901, 2),
+    (41, 14, 2905764, 3);
