@@ -29,7 +29,7 @@ public class ProductController {
             @Parameter(description = "좋아요 토글 대상 상품 ID", example = "1001")
             @PathVariable Long productId,
 
-            @Parameter(description = "클라이언트 방문자 상태. user 또는 guest만 허용", example = "user")
+            @Parameter(description = "사용자 상태. user 또는 guest만 허용", example = "guest")
             @RequestParam(required = false) String viewerType
     ) {
         ProductLikeToggleResponse response = productService.toggleLike(productId, viewerType);

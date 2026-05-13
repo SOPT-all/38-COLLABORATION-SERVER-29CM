@@ -41,7 +41,7 @@ AI 또는 로컬 개발자가 팀스페이스 Notion에 접근할 수 없는 경
 | 홈 캐러셀 조회 | GET | `/api/v1/home/carousels` |
 | 홈 메인 조회 | GET | `/api/v1/home` |
 | 쇼케이스 피드 조회 | GET | `/api/v1/showcases` |
-| 상품 좋아요 토글 | POST | `/api/v1/products/{productId}/like` |
+| 상품 좋아요 토글 | PATCH | `/api/v1/products/{productId}/like` |
 | 카테고리 메가 메뉴 조회 | GET | `/api/v1/nav` |
 | 푸터 공지 조회 | GET | `/api/v1/notices` |
 
