@@ -241,14 +241,17 @@ CommonApiResponse<T>(
 ### 6.4 cursor
 
 cursor 계약(opaque, Base64, 클라이언트 해석 금지, 다음 데이터 없을 때 처리)은 `docs/api/API_SPEC_SNAPSHOT.md` §5를 따른다.
-서버 내부 기준은 `displayOrder + id`다.
+서버 내부 기본 기준은 `displayOrder + id`다.
+홈 메인 조회는 `viewerType`에 따라 cursor payload와 정렬 기준이 달라진다.
 
 구현 방향:
 
 - `CursorCodec` 또는 유사한 공통 컴포넌트를 둔다.
 - Base64 인코딩/디코딩 로직은 공통으로 재사용한다.
 - payload 필드명은 API 명세서 예시와 맞춰 도메인별로 둔다.
-- Home cursor payload는 `displayOrder`, `sectionId`를 포함한다.
+- Home guest cursor payload는 `viewerType`, `displayOrder`, `sectionId`를 포함한다.
+- Home user cursor payload는 `viewerType`, `likedProductCount`, `displayOrder`, `sectionId`를 포함한다.
+- Home cursor의 `viewerType`이 요청 `viewerType`과 다르면 잘못된 cursor로 보고 `400 GLB-E001`을 반환한다.
 - ShowCase cursor payload는 `displayOrder`, `showcaseId`를 포함한다.
 - 잘못된 Base64 문자열, JSON 파싱 실패, 필수 필드 누락, 음수 값, 현재 API와 다른 payload 형식은 잘못된 cursor로 보고 `400 GLB-E001`을 반환한다.
 
@@ -261,6 +264,7 @@ Notice는 cursor pagination 대상이 아니며, 고정으로 최신 5건만 조
 정렬:
 
 - `display_order ASC, id ASC`를 사용한다. (`display_order`는 작을수록 먼저 노출되는 수동 노출 순서)
+- Home user 섹션 정렬은 `likedProductCount DESC, display_order ASC, id ASC`를 사용한다.
 
 다음 페이지 조회 조건은 표준 keyset pagination 형태를 사용한다.
 
@@ -270,6 +274,23 @@ WHERE display_order > :cursorDisplayOrder
 ORDER BY display_order ASC, id ASC
 LIMIT :size + 1
 ```
+
+Home user 섹션 pagination은 `likedProductCount DESC` 정렬이 섞이므로 다음 조건을 사용한다.
+
+```sql
+WHERE liked_product_count < :cursorLikedProductCount
+   OR (
+        liked_product_count = :cursorLikedProductCount
+        AND (
+            display_order > :cursorDisplayOrder
+            OR (display_order = :cursorDisplayOrder AND id > :cursorSectionId)
+        )
+   )
+ORDER BY liked_product_count DESC, display_order ASC, id ASC
+LIMIT :size + 1
+```
+
+`viewerType=user` 요청 중 좋아요 상태가 변경되면 cursor pagination의 정렬 snapshot 일관성은 보장하지 않는다.
 
 공통 페이지 정보 응답은 다음 형태를 사용한다.
 
@@ -355,23 +376,27 @@ ERD 정책:
 2. `size` 범위를 검증한다.
 3. cursor가 있으면 decode한다.
 4. 홈 숏컷을 `display_order ASC, id ASC`로 조회한다.
-5. 홈 섹션을 cursor 기준으로 `size + 1`개 조회한다.
-6. 응답에 포함될 섹션 ID 목록을 확정한다.
-7. 섹션 하위 셀렉션을 batch 조회한다.
-8. 셀렉션 하위 상품, 상품 태그, 좋아요 상태를 batch 조회한다.
-9. 상품은 좋아요 수 우선, 동률이면 기존 노출 순서로 정렬한다.
-10. `pageInfo`를 생성한다.
-11. 응답 DTO를 조립한다.
+5. `viewerType=guest`이면 홈 섹션을 `display_order ASC, id ASC` 기준 cursor로 `size + 1`개 조회한다.
+6. `viewerType=user`이면 홈 섹션을 단일 테스트 사용자의 섹션별 좋아요 상품 수 기준 cursor로 `size + 1`개 조회한다.
+7. 응답에 포함될 섹션 ID 목록을 확정한다.
+8. 섹션 하위 셀렉션을 batch 조회한다.
+9. 셀렉션 하위 상품, 상품 태그, 좋아요 상태를 batch 조회한다.
+10. `viewerType`에 맞춰 셀렉션과 상품을 정렬한다.
+11. `pageInfo`를 생성한다.
+12. 응답 DTO를 조립한다.
 
 정렬:
 
-- 섹션: `home_sections.display_order ASC, id ASC`
-- 셀렉션: `home_selections.display_order ASC, id ASC`
-- 상품: `products.like_count DESC`, 동률이면 `selection_products.display_order ASC, selection_products.id ASC`
+- guest 섹션: `home_sections.display_order ASC, id ASC`
+- guest 셀렉션: `home_selections.display_order ASC, id ASC`
+- guest 상품: `products.like_count DESC`, 동률이면 `products.id ASC`
+- user 섹션: 섹션에 포함된 좋아요 상품 수 `DESC`, 동률이면 `home_sections.display_order ASC, id ASC`
+- user 셀렉션: 셀렉션에 포함된 좋아요 상품 수 `DESC`, 동률이면 `home_selections.display_order ASC, id ASC`
+- user 상품: 좋아요된 상품 우선, `products.like_count DESC`, `products.id ASC`
 - 태그: `product_tags.display_order ASC, id ASC`
 
-`viewerType`은 상품 정렬에 영향을 주지 않으며, `isLiked` 계산에만 사용한다.
-Product Like 기반 정렬은 Main 화면의 `selections[].products`에만 적용한다.
+`viewerType=user`는 섹션, 셀렉션, 상품 정렬과 `isLiked` 계산에 사용한다.
+섹션의 좋아요 상품 수는 같은 상품이 여러 셀렉션에 중복 노출될 수 있으므로 distinct product ID 기준으로 계산한다.
 
 좋아요 상태:
 
