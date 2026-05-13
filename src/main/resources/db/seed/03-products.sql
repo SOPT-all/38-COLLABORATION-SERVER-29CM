@@ -1,6 +1,3 @@
--- Auto-generated from dummy/data/products.json
--- 41 products. image_url uses direct S3 URL.
-
 INSERT INTO products (id, brand_name, name, image_url, price, sale_rate, like_count, created_at, updated_at)
 VALUES
     (3976683, '사파리스팟', '[Safarispot X 1011Gallery] Almost Love T-Shirt (Melange/Red)', 'https://collaboration-29cm-prod-398050108626-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/products/product_3976683.jpg', 55000, 0, 5, '2026-05-13 00:00:00', '2026-05-13 00:00:00'),

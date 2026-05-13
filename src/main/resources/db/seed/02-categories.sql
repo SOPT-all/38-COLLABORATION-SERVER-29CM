@@ -1,7 +1,3 @@
--- Auto-generated from dummy/data/categories.json
--- Top: 13 (BEST/WOMEN/MEN/INTERIOR/KITCHEN/ELECTRONICS/DIGITAL/BEAUTY/FOOD/LEISURE/KIDS/CULTURE/EARTH)
--- WOMEN/MEN have full mid/sub trees. Other 11 tops have no children for now.
-
 INSERT INTO categories (id, parent_id, name, depth, display_order)
 VALUES
     (3, NULL, 'BEST', 1, 1),

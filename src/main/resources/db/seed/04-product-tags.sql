@@ -1,6 +1,3 @@
--- Auto-generated from dummy/data/products.json (tags field)
--- 72 tag rows for 41 products. display_order follows JSON array order.
-
 INSERT INTO product_tags (id, product_id, name, display_order)
 VALUES
     (1, 3976683, '리미티드 오더', 1),

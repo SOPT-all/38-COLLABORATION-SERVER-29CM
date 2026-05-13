@@ -1,7 +1,3 @@
--- Auto-generated from dummy/data/showcases.json
--- 2 sections, 96 showcases
-
--- showcase_sections (2)
 INSERT INTO showcase_sections (id, theme, title, display_order)
 VALUES
     (1, 'summer-mood', '여름의 무드', 1),

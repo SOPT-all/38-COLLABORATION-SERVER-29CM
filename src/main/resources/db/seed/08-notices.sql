@@ -1,4 +1,3 @@
--- Auto-generated from dummy/data/notices.json
 INSERT INTO notices (id, title, display_order)
 VALUES (1, '[공지] 5월 공휴일 배송 지연 안내', 1),
        (2, '[공지]개인정보처리방침 개정 내용 사전 안내 (시행일: 2026년 5월 1일)', 2),

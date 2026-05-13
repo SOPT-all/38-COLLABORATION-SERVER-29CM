@@ -1,4 +1,3 @@
--- Auto-generated from dummy/data/home.json
 -- Carousels / Shortcuts / Sections / Selections / Selection-Products
 
 -- home_carousels (10) — 캐러셀 엔티티/테이블 추가 후 주석 해제 예정
