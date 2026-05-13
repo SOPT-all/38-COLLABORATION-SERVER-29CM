@@ -60,11 +60,11 @@
 
 - `showcase_sections`는 테마별 섹션을 관리한다.
 - `showcase_sections.description`은 현재 API 응답에서 제외되므로 ERD v1에는 두지 않는다.
-- `showcases`는 featured와 일반 feed를 같은 테이블에서 관리한다.
-- `is_featured=true`인 데이터가 있으면 해당 feed를 featured로 사용한다.
+- `showcases`는 featured와 일반 쇼케이스를 같은 테이블에서 관리한다.
+- `is_featured=true`인 데이터가 있으면 해당 쇼케이스를 featured로 사용한다.
 - `is_featured` 지정이 없으면 `display_order` 기준 마지막 2개를 featured로 사용한다.
-- featured와 일반 feed의 중복 노출은 허용한다.
-- `display_order` 값이 클수록 feed의 뒤쪽 index로 본다. (`display_order`는 시간이 아닌 수동 노출 순서)
+- featured와 일반 쇼케이스의 중복 노출은 허용한다.
+- `display_order` 값이 클수록 뒤쪽 노출 순서로 본다. (`display_order`는 시간이 아닌 수동 노출 순서)
 
 ### Notice
 
