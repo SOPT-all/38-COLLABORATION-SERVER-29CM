@@ -34,7 +34,7 @@ public class HomeSelection {
     @JoinColumn(name = "home_section_id", nullable = false)
     private HomeSection homeSection;
 
-    @Column(name = "home_section_id", insertable = false, updatable = false)
+    @Column(name = "home_section_id", nullable = false, insertable = false, updatable = false)
     private Long homeSectionId;
 
     @Column(nullable = false, length = 500)

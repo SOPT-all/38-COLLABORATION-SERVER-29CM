@@ -36,7 +36,7 @@ public class HomeShortcut {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @Column(name = "category_id", insertable = false, updatable = false)
+    @Column(name = "category_id", nullable = false, insertable = false, updatable = false)
     private Long categoryId;
 
     @Column(nullable = false, length = 50)

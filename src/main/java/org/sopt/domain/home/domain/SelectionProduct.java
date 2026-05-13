@@ -46,14 +46,14 @@ public class SelectionProduct {
     @JoinColumn(name = "home_selection_id", nullable = false)
     private HomeSelection homeSelection;
 
-    @Column(name = "home_selection_id", insertable = false, updatable = false)
+    @Column(name = "home_selection_id", nullable = false, insertable = false, updatable = false)
     private Long homeSelectionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "product_id", insertable = false, updatable = false)
+    @Column(name = "product_id", nullable = false, insertable = false, updatable = false)
     private Long productId;
 
     @Column(nullable = false)

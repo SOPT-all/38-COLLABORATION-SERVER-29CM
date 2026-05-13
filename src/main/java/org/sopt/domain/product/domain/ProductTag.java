@@ -34,7 +34,7 @@ public class ProductTag {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "product_id", insertable = false, updatable = false)
+    @Column(name = "product_id", nullable = false, insertable = false, updatable = false)
     private Long productId;
 
     @Column(nullable = false, length = 50)
