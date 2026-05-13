@@ -1,4 +1,4 @@
-package org.sopt.domain.product.domain;
+package org.sopt.domain.home.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,27 +18,33 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Table(
-        name = "product_tags",
+        name = "home_selections",
         indexes = {
-                @Index(name = "idx_product_tags_product_order_id", columnList = "product_id, display_order, id")
+                @Index(name = "idx_home_selections_section_order_id", columnList = "home_section_id, display_order, id")
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ProductTag {
+public class HomeSelection {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "home_section_id", nullable = false)
+    private HomeSection homeSection;
 
-    @Column(name = "product_id", nullable = false, insertable = false, updatable = false)
-    private Long productId;
+    @Column(name = "home_section_id", nullable = false, insertable = false, updatable = false)
+    private Long homeSectionId;
 
-    @Column(nullable = false, length = 50)
-    private String name;
+    @Column(nullable = false, length = 500)
+    private String imageUrl;
+
+    @Column(nullable = false, length = 100)
+    private String title;
+
+    @Column(nullable = false, length = 255)
+    private String description;
 
     @Column(nullable = false)
     private int displayOrder;
