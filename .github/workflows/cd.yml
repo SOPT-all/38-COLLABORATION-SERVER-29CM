@@ -3,7 +3,7 @@ name: CD
 on:
   push:
     branches:
-      - main
+      - 32-chore/cd
 
   workflow_dispatch:
 
@@ -26,6 +26,18 @@ jobs:
 
       - name: Build Spring Boot jar
         run: ./gradlew clean bootJar
+
+      - name: Clean old jar on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            APP_DIR=/home/ubuntu/app
+
+            mkdir -p "$APP_DIR"
+            rm -f "$APP_DIR"/*.jar
 
       - name: Copy jar to EC2
         uses: appleboy/scp-action@v0.1.7
@@ -66,11 +78,20 @@ jobs:
               rm -f "$PID_FILE"
             fi
 
-            JAR_PATH=$(ls "$APP_DIR"/*.jar | head -n 1)
+            if sudo lsof -i :8080 > /dev/null 2>&1; then
+              sudo fuser -k 8080/tcp
+              sleep 5
+            fi
+
+            JAR_PATH=$(ls -t "$APP_DIR"/*.jar | head -n 1)
+
+            echo "Deploying jar: $JAR_PATH"
 
             nohup java -jar "$JAR_PATH" --spring.profiles.active=prod > "$LOG_FILE" 2>&1 &
 
             echo $! > "$PID_FILE"
+
+            sleep 10
 
             curl --fail --retry 10 --retry-delay 3 http://localhost:8080/api/v1/health
             tail -n 50 "$LOG_FILE"
