@@ -154,6 +154,6 @@ public class ShowcaseService {
     }
 
     private String presignImageUrl(String objectKey, Map<String, String> presignedUrlCache) {
-        return presignedUrlCache.computeIfAbsent(objectKey, s3Service::generatePresignedUrl);
+        return presignedUrlCache.computeIfAbsent(objectKey, s3Service::generatePresignedUrlOrNull);
     }
 }
