@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.domain.showcase.cursor.ShowcaseCursorPayload;
@@ -31,9 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ShowcaseService {
 
-    private static final int DEFAULT_SIZE = 3;
+    private static final int DEFAULT_SIZE = 12;
     private static final int MIN_SIZE = 1;
-    private static final int MAX_SIZE = 5;
+    private static final int MAX_SIZE = 50;
 
     private final ShowcaseRepository showcaseRepository;
     private final ShowcaseSectionRepository showcaseSectionRepository;
@@ -52,18 +51,13 @@ public class ShowcaseService {
                 ? fetchFeatured(theme, presignedUrlCache)
                 : List.of();
 
-        List<ShowcaseSection> fetchedSections = fetchSectionPage(theme, cursor, size + 1);
+        List<Showcase> fetchedShowcases = fetchShowcasePage(theme, cursor, size + 1);
 
-        boolean hasNext = fetchedSections.size() > size;
-        List<ShowcaseSection> pageSections = hasNext ? fetchedSections.subList(0, size) : fetchedSections;
+        boolean hasNext = fetchedShowcases.size() > size;
+        List<Showcase> pageShowcases = hasNext ? fetchedShowcases.subList(0, size) : fetchedShowcases;
 
-        List<Long> sectionIds = pageSections.stream().map(ShowcaseSection::getId).toList();
-        List<Showcase> showcases = sectionIds.isEmpty()
-                ? List.of()
-                : showcaseRepository.findBySectionIds(sectionIds);
-
-        String nextCursor = hasNext ? encodeSectionCursor(pageSections.get(pageSections.size() - 1)) : null;
-        List<ShowcaseSectionResponse> sections = buildSectionResponses(pageSections, showcases, presignedUrlCache);
+        String nextCursor = hasNext ? encodeShowcaseCursor(pageShowcases.get(pageShowcases.size() - 1)) : null;
+        List<ShowcaseSectionResponse> sections = buildSectionResponses(pageShowcases, presignedUrlCache);
 
         return new ShowcaseResponse(featured, sections, new PageInfoResponse(nextCursor, hasNext, size));
     }
@@ -97,35 +91,46 @@ public class ShowcaseService {
                 .toList();
     }
 
-    private List<ShowcaseSection> fetchSectionPage(String theme, ShowcaseCursorPayload cursor, int limit) {
+    private List<Showcase> fetchShowcasePage(String theme, ShowcaseCursorPayload cursor, int limit) {
         PageRequest pageable = PageRequest.of(0, limit);
         if (cursor == null) {
             return theme != null
-                    ? showcaseSectionRepository.findFirstPageByTheme(theme, pageable)
-                    : showcaseSectionRepository.findFirstPage(pageable);
+                    ? showcaseRepository.findFirstPageByTheme(theme, pageable)
+                    : showcaseRepository.findFirstPage(pageable);
         }
         return theme != null
-                ? showcaseSectionRepository.findNextPageByTheme(theme, cursor.lastDisplayOrder(), cursor.lastId(), pageable)
-                : showcaseSectionRepository.findNextPage(cursor.lastDisplayOrder(), cursor.lastId(), pageable);
+                ? showcaseRepository.findNextPageByTheme(theme,
+                        cursor.sectionDisplayOrder(), cursor.sectionId(),
+                        cursor.showcaseDisplayOrder(), cursor.showcaseId(), pageable)
+                : showcaseRepository.findNextPage(
+                        cursor.sectionDisplayOrder(), cursor.sectionId(),
+                        cursor.showcaseDisplayOrder(), cursor.showcaseId(), pageable);
     }
 
-    private String encodeSectionCursor(ShowcaseSection lastSection) {
+    private String encodeShowcaseCursor(Showcase lastShowcase) {
         return cursorCodec.encode(new ShowcaseCursorPayload(
-                lastSection.getDisplayOrder(),
-                lastSection.getId()
+                lastShowcase.getSection().getDisplayOrder(),
+                lastShowcase.getSection().getId(),
+                lastShowcase.getDisplayOrder(),
+                lastShowcase.getId()
         ));
     }
 
     private List<ShowcaseSectionResponse> buildSectionResponses(
-            List<ShowcaseSection> sections,
             List<Showcase> showcases,
             Map<String, String> presignedUrlCache
     ) {
-        Map<Long, List<Showcase>> bySectionId = showcases.stream()
-                .collect(Collectors.groupingBy(s -> s.getSection().getId()));
+        Map<Long, ShowcaseSection> sectionById = new LinkedHashMap<>();
+        Map<Long, List<Showcase>> showcasesBySectionId = new LinkedHashMap<>();
 
-        return sections.stream()
-                .map(sec -> toSectionResponse(sec, bySectionId.getOrDefault(sec.getId(), List.of()), presignedUrlCache))
+        for (Showcase showcase : showcases) {
+            ShowcaseSection section = showcase.getSection();
+            sectionById.putIfAbsent(section.getId(), section);
+            showcasesBySectionId.computeIfAbsent(section.getId(), k -> new ArrayList<>()).add(showcase);
+        }
+
+        return sectionById.values().stream()
+                .map(sec -> toSectionResponse(sec, showcasesBySectionId.get(sec.getId()), presignedUrlCache))
                 .toList();
     }
 

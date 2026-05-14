@@ -3,13 +3,17 @@ package org.sopt.domain.showcase.cursor;
 import org.sopt.global.support.cursor.CursorPayload;
 
 public record ShowcaseCursorPayload(
-        Integer lastDisplayOrder,
-        Long lastId
+        Integer sectionDisplayOrder,
+        Long sectionId,
+        Integer showcaseDisplayOrder,
+        Long showcaseId
 ) implements CursorPayload {
 
     @Override
     public void validate() {
-        CursorPayload.validateNonNegative(lastDisplayOrder);
-        CursorPayload.validateNonNegative(lastId);
+        CursorPayload.validateNonNegative(sectionDisplayOrder);
+        CursorPayload.validateNonNegative(sectionId);
+        CursorPayload.validateNonNegative(showcaseDisplayOrder);
+        CursorPayload.validateNonNegative(showcaseId);
     }
 }
