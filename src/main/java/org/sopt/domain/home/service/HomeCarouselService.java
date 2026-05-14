@@ -25,7 +25,7 @@ public class HomeCarouselService {
         List<HomeCarouselResponse> responses = carousels.stream()
                 .map(carousel -> new HomeCarouselResponse(
                         carousel.getId(),
-                        s3Service.generatePresignedUrl(carousel.getImageUrl()),
+                        s3Service.generatePresignedUrlOrNull(carousel.getImageUrl()),
                         carousel.getAltText()
                 ))
                 .toList();
