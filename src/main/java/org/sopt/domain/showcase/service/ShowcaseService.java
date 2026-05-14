@@ -16,6 +16,8 @@ import org.sopt.domain.showcase.dto.response.ShowcaseResponse;
 import org.sopt.domain.showcase.dto.response.ShowcaseSectionResponse;
 import org.sopt.domain.showcase.repository.ShowcaseRepository;
 import org.sopt.domain.showcase.repository.ShowcaseSectionRepository;
+import org.sopt.global.code.GlobalErrorCode;
+import org.sopt.global.exception.BaseException;
 import org.sopt.global.s3.service.S3Service;
 import org.sopt.global.support.cursor.CursorCodec;
 import org.sopt.global.support.pagination.PageInfoResponse;
@@ -70,7 +72,10 @@ public class ShowcaseService {
         if (themeStr == null || themeStr.isBlank()) {
             return null;
         }
-        return themeStr.toUpperCase();
+        if (!showcaseSectionRepository.existsByTheme(themeStr)) {
+            throw new BaseException(GlobalErrorCode.INVALID_REQUEST);
+        }
+        return themeStr;
     }
 
     private List<ShowcaseItemResponse> fetchFeatured(String theme, Map<String, String> presignedUrlCache) {
