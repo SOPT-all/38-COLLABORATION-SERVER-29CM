@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface ShowcaseSectionRepository extends JpaRepository<ShowcaseSection, Long> {
 
+    boolean existsByTheme(String theme);
+
     @Query("SELECT sec FROM ShowcaseSection sec ORDER BY sec.displayOrder ASC, sec.id ASC")
     List<ShowcaseSection> findFirstPage(Pageable pageable);
 

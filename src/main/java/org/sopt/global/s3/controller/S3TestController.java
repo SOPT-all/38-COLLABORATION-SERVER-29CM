@@ -100,7 +100,7 @@ public class S3TestController {
             @Parameter(description = "Presigned URL을 생성할 S3 객체 key입니다.", example = "test/sample.png")
             @RequestParam String objectKey
     ) {
-        String presignedUrl = s3Service.generatePresignedUrl(objectKey);
+        String presignedUrl = s3Service.generatePresignedUrlOrNull(objectKey);
 
         Map<String, Object> result = new HashMap<>();
         result.put("objectKey", objectKey);

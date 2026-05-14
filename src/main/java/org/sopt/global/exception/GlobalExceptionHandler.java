@@ -11,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.FieldError;
@@ -103,6 +104,16 @@ public class GlobalExceptionHandler {
     public CommonApiResponse<Void> handlePersistenceException(Exception exception) {
         log.error("Persistence system error occurred", exception);
         return CommonApiResponse.failureBody(GlobalErrorCode.INTERNAL_SERVER_ERROR);
+    }
+
+    // 지원하지 않는 HTTP 메서드 요청을 405로 처리합니다.
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public CommonApiResponse<Void> handleHttpRequestMethodNotSupportedException(
+            HttpRequestMethodNotSupportedException exception
+    ) {
+        log.warn("HTTP method not supported: {}", exception.getMethod());
+        return CommonApiResponse.failureBody(GlobalErrorCode.INVALID_REQUEST);
     }
 
     // 존재하지 않는 정적 리소스 또는 경로 요청을 404로 처리합니다.

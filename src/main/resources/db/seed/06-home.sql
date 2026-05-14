@@ -1,18 +1,18 @@
 -- Carousels / Shortcuts / Sections / Selections / Selection-Products
 
--- home_carousels (10) — 캐러셀 엔티티/테이블 추가 후 주석 해제 예정
--- INSERT INTO home_carousels (id, image_url, alt_text, display_order)
--- VALUES
---     (1, 'home/carousel_01.png', 'SUMMER SIGNAL', 1),
---     (2, 'home/carousel_02.jpg', '수요입점회', 2),
---     (3, 'home/carousel_03.jpg', 'NIKE', 3),
---     (4, 'home/carousel_04.jpg', 'RONRON', 4),
---     (5, 'home/carousel_05.jpg', 'EASTLOGUE PERMANENT×MAZIUNTITLED', 5),
---     (6, 'home/carousel_06.jpg', 'FINCA', 6),
---     (7, 'home/carousel_07.jpg', 'KEEN', 7),
---     (8, 'home/carousel_08.jpg', 'AERSE', 8),
---     (9, 'home/carousel_09.png', '714CENTER', 9),
---     (10, 'home/carousel_10.png', 'SNOWPEAK APPAREL', 10);
+-- home_carousels (10)
+INSERT INTO home_carousels (id, image_url, alt_text, display_order)
+VALUES
+    (1, 'home/carousel_01.png', 'SUMMER SIGNAL', 1),
+    (2, 'home/carousel_02.jpg', '수요입점회', 2),
+    (3, 'home/carousel_03.jpg', 'NIKE', 3),
+    (4, 'home/carousel_04.jpg', 'RONRON', 4),
+    (5, 'home/carousel_05.jpg', 'EASTLOGUE PERMANENT×MAZIUNTITLED', 5),
+    (6, 'home/carousel_06.jpg', 'FINCA', 6),
+    (7, 'home/carousel_07.jpg', 'KEEN', 7),
+    (8, 'home/carousel_08.jpg', 'AERSE', 8),
+    (9, 'home/carousel_09.png', '714CENTER', 9),
+    (10, 'home/carousel_10.png', 'SNOWPEAK APPAREL', 10);
 
 -- home_shortcuts (10)
 INSERT INTO home_shortcuts (id, category_id, name, image_url, display_order)

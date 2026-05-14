@@ -58,4 +58,11 @@ public class ProductLike {
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public static ProductLike of(User user, Product product) {
+        ProductLike like = new ProductLike();
+        like.user = user;
+        like.product = product;
+        return like;
+    }
 }

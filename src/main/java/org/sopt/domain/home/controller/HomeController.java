@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.sopt.domain.home.dto.response.HomeCarouselListResponse;
 import org.sopt.domain.home.dto.response.HomeMainResponse;
+import org.sopt.domain.home.service.HomeCarouselService;
 import org.sopt.domain.home.service.HomeService;
 import org.sopt.global.code.GlobalSuccessCode;
 import org.sopt.global.response.CommonApiResponse;
@@ -21,6 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeController {
 
     private final HomeService homeService;
+    private final HomeCarouselService homeCarouselService;
+
+    @Operation(summary = "홈 캐러셀 조회", description = "홈 상단 캐러셀 이미지 목록을 조회합니다.")
+    @GetMapping("/carousels")
+    public ResponseEntity<CommonApiResponse<HomeCarouselListResponse>> getCarousels() {
+        HomeCarouselListResponse response = homeCarouselService.getCarousels();
+        return CommonApiResponse.successResponse(GlobalSuccessCode.OK, response);
+    }
 
     @Operation(summary = "홈 메인 조회", description = "홈 화면에 필요한 숏컷과 메인 큐레이션 섹션을 조회합니다.")
     @GetMapping
