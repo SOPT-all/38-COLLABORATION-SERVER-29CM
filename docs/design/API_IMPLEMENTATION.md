@@ -359,9 +359,10 @@ ERD 정책:
 
 필요 컴포넌트:
 
-- `HomeCarouselController`
+- `HomeController`
 - `HomeCarouselService`
 - `HomeCarouselRepository`
+- `HomeCarouselListResponse`
 - `HomeCarouselResponse`
 
 ### 8.2 홈 메인 조회
