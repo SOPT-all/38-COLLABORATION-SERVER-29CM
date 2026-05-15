@@ -28,7 +28,7 @@ public class ShowcaseController {
     )
     @GetMapping
     public ResponseEntity<CommonApiResponse<ShowcaseResponse>> getShowcases(
-            @Parameter(description = "테마 필터 (FASHION, LIVING, BEAUTY, KIDS, FOOD)")
+            @Parameter(description = "테마 필터", example = "LIFESTYLE")
             @RequestParam(required = false) String theme,
 
             @Parameter(description = "다음 페이지 조회 기준 cursor")

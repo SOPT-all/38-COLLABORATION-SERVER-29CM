@@ -1,7 +1,7 @@
 INSERT INTO showcase_sections (id, theme, title, display_order)
 VALUES
-    (1, 'SUMMER MOOD', '여름의 무드', 1),
-    (2, 'BRAND STORIES', '브랜드 스토리', 2);
+    (1, 'LIFESTYLE', '여름의 무드', 1),
+    (2, 'LIFESTYLE', '브랜드 스토리', 2);
 
 -- showcases (96)
 INSERT INTO showcases (id, showcase_section_id, title, description, image_url, start_date, end_date, is_featured, display_order)
