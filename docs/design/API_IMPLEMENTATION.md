@@ -458,6 +458,9 @@ featured 정책:
 - cursor가 있는 후속 요청에서는 `featured=[]`
 - featured와 일반 쇼케이스 중복은 허용한다.
 
+pagination 단위가 showcase 개수 기준이므로 동일한 `sectionId`가 여러 페이지 응답에 반복될 수 있다.
+클라이언트는 `sections`를 단순 append하지 않고 `sectionId` 기준으로 showcases를 병합해야 한다.
+
 정렬:
 
 - 일반 쇼케이스 pagination: `showcase_sections.display_order ASC, showcase_sections.id ASC, showcases.display_order ASC, showcases.id ASC`
