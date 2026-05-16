@@ -14,19 +14,21 @@ VALUES
     (9, 'home/carousel_09.png', '714CENTER', 9),
     (10, 'home/carousel_10.png', 'SNOWPEAK APPAREL', 10);
 
--- home_shortcuts (10)
+-- home_shortcuts (12)
 INSERT INTO home_shortcuts (id, category_id, name, image_url, display_order)
 VALUES
     (1, 3, 'BEST', 'home/best.png', 1),
-    (2, 2, 'MEN', 'home/men.png', 2),
-    (3, 12, 'CULTURE', 'home/culture.png', 3),
-    (4, 5, 'KITCHEN', 'home/kitchen.png', 4),
-    (5, 6, 'ELECTRONICS', 'home/electronics.png', 5),
-    (6, 7, 'DIGITAL', 'home/digital.png', 6),
-    (7, 8, 'BEAUTY', 'home/beauty.png', 7),
-    (8, 9, 'FOOD', 'home/food.png', 8),
-    (9, 10, 'LEISURE', 'home/leisure.png', 9),
-    (10, 11, 'KIDS', 'home/kids.png', 10);
+    (2, 1, 'WOMEN', 'home/best.png', 2),
+    (3, 2, 'MEN', 'home/men.png', 3),
+    (4, 4, 'INTERIOR', 'home/best.png', 4),
+    (5, 5, 'KITCHEN', 'home/kitchen.png', 5),
+    (6, 6, 'ELECTRONICS', 'home/electronics.png', 6),
+    (7, 7, 'DIGITAL', 'home/digital.png', 7),
+    (8, 8, 'BEAUTY', 'home/beauty.png', 8),
+    (9, 9, 'FOOD', 'home/food.png', 9),
+    (10, 10, 'LEISURE', 'home/leisure.png', 10),
+    (11, 11, 'KID', 'home/kids.png', 11),
+    (12, 12, 'CULTURE', 'home/culture.png', 12);
 
 -- home_sections (14)
 INSERT INTO home_sections (id, title, description, hero_image_url, display_order)
