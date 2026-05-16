@@ -134,7 +134,7 @@ Table product_likes {
 
 Table showcase_sections {
   id bigint [pk, increment]
-  theme varchar(50) [not null, unique]
+  theme varchar(50) [not null]
   title varchar(100) [not null]
   display_order int [not null]
 

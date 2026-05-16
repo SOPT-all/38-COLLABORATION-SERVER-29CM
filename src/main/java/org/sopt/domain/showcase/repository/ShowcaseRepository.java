@@ -22,6 +22,54 @@ public interface ShowcaseRepository extends JpaRepository<Showcase, Long> {
     @Query("SELECT s FROM Showcase s JOIN FETCH s.section sec WHERE sec.theme = :theme ORDER BY s.displayOrder DESC, s.id DESC")
     List<Showcase> findLastNByTheme(@Param("theme") String theme, Pageable pageable);
 
-    @Query("SELECT s FROM Showcase s JOIN FETCH s.section sec WHERE sec.id IN :sectionIds ORDER BY sec.displayOrder ASC, s.displayOrder ASC, s.id ASC")
-    List<Showcase> findBySectionIds(@Param("sectionIds") List<Long> sectionIds);
+    @Query("""
+            SELECT s FROM Showcase s JOIN FETCH s.section sec
+            ORDER BY sec.displayOrder ASC, sec.id ASC, s.displayOrder ASC, s.id ASC
+            """)
+    List<Showcase> findFirstPage(Pageable pageable);
+
+    @Query("""
+            SELECT s FROM Showcase s JOIN FETCH s.section sec
+            WHERE sec.theme = :theme
+            ORDER BY sec.displayOrder ASC, sec.id ASC, s.displayOrder ASC, s.id ASC
+            """)
+    List<Showcase> findFirstPageByTheme(@Param("theme") String theme, Pageable pageable);
+
+    @Query("""
+            SELECT s FROM Showcase s JOIN FETCH s.section sec
+            WHERE (
+                sec.displayOrder > :sectionDisplayOrder
+                OR (sec.displayOrder = :sectionDisplayOrder AND sec.id > :sectionId)
+                OR (sec.displayOrder = :sectionDisplayOrder AND sec.id = :sectionId AND s.displayOrder > :showcaseDisplayOrder)
+                OR (sec.displayOrder = :sectionDisplayOrder AND sec.id = :sectionId AND s.displayOrder = :showcaseDisplayOrder AND s.id > :showcaseId)
+            )
+            ORDER BY sec.displayOrder ASC, sec.id ASC, s.displayOrder ASC, s.id ASC
+            """)
+    List<Showcase> findNextPage(
+            @Param("sectionDisplayOrder") Integer sectionDisplayOrder,
+            @Param("sectionId") Long sectionId,
+            @Param("showcaseDisplayOrder") Integer showcaseDisplayOrder,
+            @Param("showcaseId") Long showcaseId,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT s FROM Showcase s JOIN FETCH s.section sec
+            WHERE sec.theme = :theme
+            AND (
+                sec.displayOrder > :sectionDisplayOrder
+                OR (sec.displayOrder = :sectionDisplayOrder AND sec.id > :sectionId)
+                OR (sec.displayOrder = :sectionDisplayOrder AND sec.id = :sectionId AND s.displayOrder > :showcaseDisplayOrder)
+                OR (sec.displayOrder = :sectionDisplayOrder AND sec.id = :sectionId AND s.displayOrder = :showcaseDisplayOrder AND s.id > :showcaseId)
+            )
+            ORDER BY sec.displayOrder ASC, sec.id ASC, s.displayOrder ASC, s.id ASC
+            """)
+    List<Showcase> findNextPageByTheme(
+            @Param("theme") String theme,
+            @Param("sectionDisplayOrder") Integer sectionDisplayOrder,
+            @Param("sectionId") Long sectionId,
+            @Param("showcaseDisplayOrder") Integer showcaseDisplayOrder,
+            @Param("showcaseId") Long showcaseId,
+            Pageable pageable
+    );
 }

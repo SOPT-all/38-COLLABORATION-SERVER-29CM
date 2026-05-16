@@ -97,7 +97,7 @@
 - `home_shortcuts.category_id`는 `categories.id`를 참조한다.
 - `selection_products.home_selection_id + selection_products.product_id`는 unique다.
 - `product_likes.user_id + product_likes.product_id`는 unique다.
-- `showcase_sections.theme`은 unique다.
+- `showcase_sections.theme`은 unique하지 않다.
 
 ## 6. 시각화 방법
 

@@ -28,13 +28,13 @@ public class ShowcaseController {
     )
     @GetMapping
     public ResponseEntity<CommonApiResponse<ShowcaseResponse>> getShowcases(
-            @Parameter(description = "테마 필터 (FASHION, LIVING, BEAUTY, KIDS, FOOD)")
+            @Parameter(description = "테마 필터", example = "LIFESTYLE")
             @RequestParam(required = false) String theme,
 
             @Parameter(description = "다음 페이지 조회 기준 cursor")
             @RequestParam(required = false) String cursor,
 
-            @Parameter(description = "한 번에 조회할 섹션 개수 (1~5, 기본값 3)")
+            @Parameter(description = "한 번에 조회할 쇼케이스 개수 (1~50, 기본값 12)")
             @RequestParam(required = false) Integer size
     ) {
         ShowcaseResponse response = showcaseService.getShowcases(theme, cursor, size);
